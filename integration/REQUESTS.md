@@ -101,6 +101,25 @@ Les demandes R-001 à R-011 viennent de l'inventaire du 2026-10-25 (`apex-engine
 - État : ouverte. Les deux dépôts sont privés ou publics selon le cas (`apex-engine` public,
   `apex-ui` privé) : la construction des releases devra pouvoir lire `apex-ui`.
 
+### R-013 — Plusieurs pièces sur le plateau, par défaut
+- De : utilisateur | À : apex-engine, puis apex-ui | Contrat : C1 | Ouverte : 2026-10-25
+- Besoin (décision de l'utilisateur) : `PipelineParams.allow_multi_mesh` passe à vrai par
+  défaut, car l'interface assemble le plateau en un seul maillage et un slicer doit accepter
+  plusieurs pièces. Dans l'interface, ce réglage va dans « Réglages avancés de l'algorithme
+  pour développeur », pas dans « Paramètres de tranchage ».
+- Constat (`apex-engine@6e0081e`) :
+  - `main.py` : `allow_multi_mesh: bool = False` ; `step1_ingest._load_raw_mesh` refuse
+    alors un fichier à plusieurs objets.
+  - Avec le réglage actif, `_load_raw_mesh` concatène `loaded.geometry.values()` : les
+    transformations de la scène (placement des objets d'un 3MF) sont perdues. À vérifier,
+    et à remplacer par `loaded.to_geometry()` si c'est le cas.
+  - `_extract_dominant_shell` garde la plus grosse coque et jette les autres quand elle fait
+    au moins 95 % du volume et que le maillage combiné n'est pas étanche : une petite pièce
+    posée à côté d'une grande pourrait disparaître sans erreur. À vérifier sur un plateau à
+    deux pièces de tailles très différentes.
+  - Les fichiers à un seul objet donnent le même résultat dans les deux positions.
+- État : ouverte.
+
 ## Fermées
 
 ### R-001 — Sort de la copie du moteur dans `apex`
