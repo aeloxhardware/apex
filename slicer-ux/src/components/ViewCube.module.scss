@@ -1,0 +1,37 @@
+.container {
+  position: fixed;
+  top: 70px;
+  right: 24px;
+  width: 130px;
+  height: 130px;
+  z-index: 1000;
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.gizmo {
+  overflow: visible;
+}
+
+.point {
+  cursor: pointer;
+
+  circle {
+    transition: r 0.15s ease, filter 0.15s ease;
+  }
+
+  &:hover circle {
+    r: 10;
+    filter: drop-shadow(0 0 6px currentColor);
+  }
+}
+
+.label {
+  fill: #0a0f1a;
+  font-size: 9px;
+  font-weight: 700;
+  pointer-events: none;
+  user-select: none;
+}

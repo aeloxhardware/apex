@@ -1,0 +1,60 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Dependency folders
+node_modules
+**/node_modules/
+installer/**/node_modules/
+icons-main/**/node_modules/
+
+# Build / generated output
+/dist/
+dist
+dist-ssr
+release
+build/
+coverage/
+*.tsbuildinfo
+installer/**/dist/
+installer/**/build/
+installer/**/release/
+icons-main/**/dist/
+icons-main/**/.next/
+
+# Local env / generated files
+*.local
+*.pem
+installer/**/*.log
+icons-main/**/*.log
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.dyad/
+
+# .NET build artifacts (installer-wpf-prototype/)
+bin/
+obj/
+
+# Project-specific generated folders
+installer/payload/
+installer/release*/
+installer/*.log
+installer/*.old-backup
+icons-main/
+
+# Matériel de recherche non nécessaire au slicer (exemples de G-code de slicers tiers…)
+/research/

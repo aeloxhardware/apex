@@ -1,0 +1,216 @@
+.container {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  z-index: 1000;
+  pointer-events: none;
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  pointer-events: auto;
+  transition: background 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+  background: rgba(10, 15, 26, 0.25);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  border: none;
+  box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.35), 0 4px 16px 0 rgba(0, 0, 0, 0.25);
+}
+
+.topToolbar {
+  padding: 8px 16px;
+  border-radius: 33px;
+  gap: 5.33px;
+  position: relative;
+  overflow: visible !important;
+}
+
+.bottomToolbar {
+  position: relative;
+  padding: 6px 10px;
+  border-radius: 22px;
+  gap: 6px;
+  overflow: visible !important;
+}
+
+// Slot du mode modélisation : occupe tout le conteneur commun une fois déformé, et
+// dispose les boutons CAD injectés par portail (voir Sidebar.tsx / ModelingSidebar.tsx)
+// exactement comme l'ancien `.opsBarInner`.
+.modelingSlot {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 6px;
+}
+
+// Slot du mode Prévisualisation : colonne verticale d'icônes (Coloration / Édition / Fonction).
+.previewSlot {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 4px;
+  padding: 12px 6px;
+}
+
+.button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  // Couleur opaque + transparence sur l'icône entière (une couleur translucide cumule son opacité
+  // là où les traits d'une icône se recouvrent : points plus clairs aux jonctions).
+  color: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  outline: none;
+  position: relative;
+  z-index: 2;
+
+  svg { opacity: 0.85; }
+
+  &:hover:not(:disabled) {
+    color: white;
+    svg { opacity: 1; }
+    background: rgba(255, 255, 255, 0.18);
+  }
+  
+  &:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+  }
+}
+
+.topButton {
+  height: 42px;
+  padding: 0 14px;
+  border-radius: 14px;
+  gap: 8px;
+
+  &.active {
+    color: #00f0ff;
+  }
+}
+
+.topButtonLabel {
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.sliceButton {
+  background: rgba(0, 240, 255, 0.15);
+  color: #00f0ff;
+  border: none;
+  
+  &:hover {
+    background: rgba(0, 240, 255, 0.25) !important;
+  }
+}
+
+.configButton {
+  color: #a78bfa;
+  &:hover {
+    background: rgba(167, 139, 250, 0.15) !important;
+  }
+}
+
+.logoContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  padding: 2px;
+  // Le logo ouvre l'espace Accueil : bouton sans habillage.
+  border: none;
+  background: none;
+  cursor: pointer;
+  position: relative;
+  z-index: 2;
+
+  .logoImg {
+    width: 32px;
+    height: 32px;
+    object-fit: contain;
+    filter: brightness(0) invert(1);
+  }
+}
+
+.bottomButton {
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+
+  svg {
+    width: 16px;
+    height: 16px;
+    transition: transform 0.2s ease;
+  }
+
+  &.active {
+    background: rgba(0, 240, 255, 0.15);
+    box-shadow:
+      0 0 8px rgba(0, 240, 255, 0.2),
+      inset 0 0 6px rgba(0, 240, 255, 0.1);
+    color: #00f0ff;
+  }
+}
+
+.activeIndicator {
+  position: absolute;
+  // La lueur est un drop-shadow du conteneur : le clip-path de la forme (.activeIndicatorShape)
+  // rognerait un box-shadow.
+  filter: drop-shadow(0 0 7px rgba(255, 255, 255, 0.15));
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0;
+}
+
+// Rectangle arrondi (onglets) ou triangle arrondi (logo) : deux polygones de même nombre de points,
+// interpolés par la transition.
+.activeIndicatorShape {
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.12);
+  transition: clip-path 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.uploadActionButton {
+  color: #00f0ff !important;
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+
+  &:hover {
+    background: rgba(0, 240, 255, 0.15) !important;
+  }
+}
+
+.separator {
+  width: 1px;
+  height: 18px;
+  background: rgba(255, 255, 255, 0.2);
+  margin: 0 4px;
+}
+
+.topSeparator {
+  width: 1px;
+  height: 24px;
+  background: rgba(255, 255, 255, 0.2);
+  margin: 0 2px;
+}

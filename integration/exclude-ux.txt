@@ -1,0 +1,6 @@
+# Chemins de l'interface (apex-ui) NON copiés dans apex/slicer-ux :
+# journaux de session Claude.
+# Motifs ancrés à la racine du dépôt source ; `*` couvre aussi les `/`.
+claude_context
+# icons-main/ est ignoré par le .gitignore de l'interface, et aucun code ne l'utilise.
+icons-main

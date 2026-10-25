@@ -1,0 +1,4 @@
+{
+  "slicer-engine": {"repository": "aeloxhardware/apex-engine", "commit": "6e0081e45376be1969dcb201d59015f5db2fed60", "date": "2026-10-25T17:08:52+01:00"},
+  "slicer-ux": {"repository": "aeloxhardware/apex-ui", "commit": "b57fb2b432a693a32ffd0e7cad4e01b64907f417", "date": "2026-10-22T09:06:07+02:00"}
+}

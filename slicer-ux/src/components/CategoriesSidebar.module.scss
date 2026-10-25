@@ -1,0 +1,483 @@
+.leftSidebarContainer {
+  position: fixed;
+  left: 24px;
+  top: 212px;
+  display: flex;
+  flex-direction: column;
+  z-index: 1000;
+  pointer-events: none;
+}
+
+.categoriesToolbar {
+  display: flex;
+  flex-direction: row;
+  width: 293px;
+  max-width: 293px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-behavior: smooth;
+  gap: 6px;
+  pointer-events: auto;
+  background: rgba(10, 15, 26, 0.25);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  border: none;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4), 0 2px 8px 0 rgba(0, 0, 0, 0.3);
+  padding: 8px;
+  border-radius: 20px;
+
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  > div {
+    width: auto;
+    flex: 0 0 auto;
+    transition: opacity 0.2s ease;
+  }
+
+  // Pendant un morphing (cf. LiquidGlassMorph), le verre animé tient lieu de fond : la pilule
+  // perd le sien instantanément (aucune transition, sinon il se superposerait au verre animé) et
+  // son contenu s'estompe.
+  &.morphing {
+    background: transparent;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    box-shadow: none;
+
+    > div {
+      opacity: 0;
+    }
+  }
+}
+
+.categoryButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: auto;
+  min-width: 40px;
+  height: 40px;
+  padding: 0 12px;
+  gap: 8px;
+  flex: 0 0 auto;
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.7);
+  cursor: pointer;
+  border-radius: 12px;
+  transition: all 0.2s ease;
+  outline: none;
+
+  &:hover {
+    color: rgba(255, 255, 255, 0.95);
+    background: rgba(255, 255, 255, 0.12);
+  }
+
+  &.active {
+    background: rgba(0, 240, 255, 0.18);
+    color: #00f0ff;
+    box-shadow: 0 0 12px rgba(0, 240, 255, 0.25);
+  }
+
+  &.disabledButton {
+    opacity: 0.35;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+}
+
+.categoryLabel {
+  white-space: nowrap;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+// Base commune des deux panneaux de Prévisualisation — même verre que .fusionMenuContainer
+// ci-dessous et que le morphing qui les fait naître (LiquidGlassMorph), pour une bascule invisible.
+// Géométrie alignée sur previewGeometry() dans CategoriesSidebar.tsx : départ au niveau de la
+// pilule (top 212), fin à 236px du bas de l'écran.
+%previewPanelBase {
+  position: fixed;
+  left: 24px;
+  width: 440px; // PREVIEW_W (spaceMorphGeometry.ts)
+  border: none;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4), 0 2px 8px 0 rgba(0, 0, 0, 0.3);
+  border-radius: 20px;
+  z-index: 1000;
+  overflow: hidden;
+  isolation: isolate;
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(10, 15, 26, 0.25);
+    // 2,5× le verre standard (4px) — même valeur que PREVIEW_GLASS_BLUR_PX (LiquidGlassMorph.tsx),
+    // flou de fin du morphing qui fait naître ces panneaux.
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    z-index: -1;
+    border-radius: inherit;
+    pointer-events: none;
+  }
+
+  // Pendant la fusion inverse (retour vers Préparation, cf. previewMorphPhase dans
+  // CategoriesSidebar.tsx), le verre animé (LiquidGlassMorph) tient lieu de fond : celui du
+  // panneau disparaît instantanément, sans transition (sinon il se superposerait au verre animé).
+  &.morphing {
+    box-shadow: none;
+
+    &::before {
+      opacity: 0;
+    }
+  }
+}
+
+// Panneau du haut : ce que la pilule devient (légende des types de ligne, cf. `previewUpperContent`).
+.previewPanelUpper {
+  @extend %previewPanelBase;
+  top: calc(212px - var(--preview-lift, 0px));
+  // --preview-upper-h / --preview-lower-h : posées par usePreviewPanelVars (le plus petit des deux ×1,3×0,85).
+  height: var(--preview-upper-h, max(120px, 100vh - 714px));
+}
+
+// Onglet Édition : le panneau du haut absorbe celui du bas et occupe leur surface commune.
+.previewPanelUpperExpanded {
+  height: calc(var(--preview-upper-h, max(120px, 100vh - 714px)) + 16px + var(--preview-lower-h, 250px));
+}
+
+// Panneau du bas, né par mitose du panneau du haut (contenu à brancher plus tard).
+.previewPanelLower {
+  @extend %previewPanelBase;
+  top: calc(212px - var(--preview-lift, 0px) + var(--preview-upper-h, max(120px, 100vh - 714px)) + 16px);
+  height: var(--preview-lower-h, 250px);
+}
+
+// Contenu du panneau du haut, sur toute sa surface ; s'estompe pendant la fusion inverse comme
+// .previewPanelFooter.
+.previewPanelBody {
+  position: absolute;
+  inset: 0;
+  transition: opacity 0.2s ease;
+
+  .morphing > & {
+    opacity: 0 !important;
+  }
+}
+
+// Contenu du panneau du haut en attente de la forme finale du panneau (changement d'onglet).
+.previewPanelBodyWaiting {
+  opacity: 0 !important;
+  pointer-events: none;
+  transition: opacity 0.15s ease !important;
+}
+
+// Haut du panneau du bas (informations G-code, cf. `previewLowerHeader`).
+.previewPanelHeader {
+  position: absolute;
+  left: 14px;
+  right: 14px;
+  top: 12px;
+  transition: opacity 0.2s ease;
+
+  .morphing > & {
+    opacity: 0;
+  }
+}
+
+// Enveloppe de `previewBelowContent` (carte de conversion, positionnée par elle-même) : ne porte
+// que le fondu, et disparaît d'un coup pendant la fusion inverse comme les panneaux.
+.previewBelow.morphing {
+  opacity: 0 !important;
+}
+
+// Bas du panneau du bas (sélecteur de vitesse, cf. `previewLowerContent`). S'estompe avec le
+// fond pendant la fusion inverse, comme le contenu de la pilule (.morphing).
+.previewPanelFooter {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: 12px;
+  transition: opacity 0.2s ease;
+
+  .morphing > & {
+    opacity: 0;
+  }
+}
+
+.fusionMenuContainer {
+  position: fixed;
+  left: 24px;
+  top: 280px;
+  width: 320px;
+  max-height: 400px;
+  border: none;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4), 0 2px 8px 0 rgba(0, 0, 0, 0.3);
+  border-radius: 16px;
+  z-index: 1001;
+  display: flex;
+  flex-direction: column;
+  overflow: visible;
+  isolation: isolate;
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(10, 15, 26, 0.25);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    z-index: -1;
+    border-radius: inherit;
+    pointer-events: none;
+  }
+
+  > * {
+    transition: opacity 0.2s ease;
+  }
+
+  // Pendant le morphing d'ouverture/fermeture, le verre animé (LiquidGlassMorph) tient lieu de
+  // fond : celui du panneau disparaît instantanément et le contenu s'estompe par-dessus.
+  &.morphing {
+    box-shadow: none;
+
+    &::before {
+      opacity: 0;
+    }
+
+    > * {
+      opacity: 0;
+    }
+  }
+}
+
+// Le mécanisme d'ouverture/fermeture du panneau est fonctionnel, mais son contenu (réglages
+// qualité/solidité/vitesse) n'est pas encore branché : grisé et non interactif, tooltip "Arrive
+// bientôt" sur chaque ligne (cf. CategoriesSidebar.tsx).
+.contentInert {
+  opacity: 0.45;
+  filter: grayscale(1);
+
+  .itemRow {
+    cursor: default;
+    pointer-events: none;
+  }
+
+  // grayscale() désature mais ne neutralise pas la luminosité : le cyan très saturé de
+  // .itemInput (#00f0ff, cf. plus bas) restait visuellement "vif" une fois désaturé en gris
+  // clair. On écrase sa couleur ici pour un gris terne sans ambiguïté.
+  .itemInput {
+    color: rgba(255, 255, 255, 0.5);
+  }
+}
+
+.fusionMenuContent {
+  padding: 16px;
+  overflow-y: scroll;
+  max-height: 400px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  border-radius: 16px;
+
+  &::-webkit-scrollbar {
+    width: 0px;
+    background: transparent;
+  }
+}
+
+.externalScrollThumb {
+  position: absolute;
+  left: calc(100% + 4px);
+  width: 6px;
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  border-radius: 999px;
+  pointer-events: auto;
+  cursor: default;
+  z-index: 1002;
+  transition: width 0.25s cubic-bezier(0.16, 1, 0.3, 1), background 0.2s ease;
+
+  &:hover, &.dragging {
+    width: 12px;
+    background: rgba(255, 255, 255, 0.35);
+  }
+}
+
+.sectionGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sectionTitle {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.45);
+  letter-spacing: 0.5px;
+}
+
+.itemsList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.itemRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+  padding: 8px 10px;
+  border-radius: 8px;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.9);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  transform: perspective(400px) translateZ(0px);
+
+  &.clickableRow {
+    cursor: pointer;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.12);
+      border-color: rgba(255, 255, 255, 0.2);
+      transform: perspective(400px) translateZ(6px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+    }
+  }
+
+  &:not(.clickableRow):hover {
+    background: rgba(255, 255, 255, 0.08);
+    transform: perspective(400px) translateZ(4px);
+  }
+}
+
+.itemName {
+  flex: 1;
+  padding-right: 8px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.itemInput {
+  width: 55px;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 4px;
+  color: #00f0ff;
+  text-align: center;
+  font-size: 11px;
+  padding: 2px 4px;
+  outline: none;
+
+  &:focus {
+    border-color: #00f0ff;
+    box-shadow: 0 0 6px rgba(0, 240, 255, 0.3);
+  }
+}
+
+.dropdownTrigger {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 6px;
+  color: #00f0ff;
+  font-size: 11px;
+  padding: 4px 8px;
+  transition: all 0.2s;
+  max-width: 140px;
+  pointer-events: none;
+}
+
+.dropdownText {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.patternPopup {
+  position: fixed;
+  left: calc(82px + 320px + 12px);
+  top: calc(50% - 180px);
+  width: 320px;
+  max-height: 400px;
+  border: none;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4), 0 2px 8px 0 rgba(0, 0, 0, 0.3);
+  border-radius: 16px;
+  z-index: 1003;
+  display: flex;
+  flex-direction: column;
+  overflow: visible;
+  isolation: isolate;
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(10, 15, 26, 0.25);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    z-index: -1;
+    border-radius: inherit;
+    pointer-events: none;
+  }
+}
+
+.patternPopupContent {
+  padding: 16px;
+  overflow-y: scroll;
+  max-height: 400px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  border-radius: 16px;
+
+  &::-webkit-scrollbar {
+    width: 0px;
+    background: transparent;
+  }
+}
+
+.patternItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+  padding: 8px 10px;
+  border-radius: 8px;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.9);
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  transform: perspective(400px) translateZ(0px);
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.2);
+    color: #fff;
+    transform: perspective(400px) translateZ(6px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  }
+
+  &.activePattern {
+    background: rgba(0, 240, 255, 0.2);
+    border-color: #00f0ff;
+    color: #00f0ff;
+    font-weight: 600;
+  }
+}

@@ -1,0 +1,98 @@
+// Plein écran (monté à la racine dans Index.tsx, hors du bloc chrome démonté en Paramètres) :
+// les panneaux en superposition (sidebars, menus, tooltips), tous en `position: fixed` avec un
+// z-index ≥ 1000, forment leur propre contexte d'empilement et restent ainsi visibles par-dessus,
+// sans flou ni voile.
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+// Étape 1 : flou seul, sans aucune teinte — une simple loupe sur ce qu'il y a derrière.
+.blurLayer {
+  position: fixed;
+  z-index: 30;
+  pointer-events: none;
+  inset: 0;
+  -webkit-backdrop-filter: blur(0px);
+  backdrop-filter: blur(0px);
+  animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  animation-fill-mode: both;
+}
+.blurIn { animation-name: veilBlurIn; }
+.blurOff { display: none; }
+.blurOut { animation-name: veilBlurOut; }
+@keyframes veilBlurIn { from { backdrop-filter: blur(0px); } to { backdrop-filter: blur(18px); } }
+@keyframes veilBlurOut { from { backdrop-filter: blur(18px); } to { backdrop-filter: blur(0px); } }
+
+// Étape 2 : tuiles peintes par un Worker dans un OffscreenCanvas (veil.worker.ts), au-dessus du flou.
+.veilCanvas {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 30;
+  pointer-events: none;
+}
+
+// Rideau de fermeture de l'application : au-dessus de TOUT (panneaux de verre, infobulles, modales : z-index ≥ 1000).
+.onTop { z-index: 100000; }
+
+.textBlock {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  text-align: center;
+}
+
+.brand {
+  font-family: 'Ethnocentric', 'Orbitron', sans-serif;
+  font-weight: 400;
+  font-size: clamp(64px, 11vw, 160px);
+  line-height: 1;
+  letter-spacing: 0.05em;
+  color: #eafcff;
+  // Halo blanc seul, sans teinte bleue/cyan.
+  text-shadow: 0 0 16px rgba(255, 255, 255, 0.6);
+}
+
+// Petit, tout en majuscules et très espacé — le style "M O D É L I S A T I O N". L'espacement
+// des lettres est calculé dynamiquement (voir SpaceTransitionOverlay.tsx) pour que le mot
+// remplisse toujours la même largeur, que le nom de l'espace fasse 3 lettres ("Dev") ou 16
+// ("Prévisualisation") — un letter-spacing fixe en em ne le permettrait pas.
+.spaceName {
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 600;
+  font-size: 15px;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+// Messages successifs de la fermeture, à la place de « APEX » + nom de l'espace.
+.shutdownMessage {
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 600;
+  font-size: clamp(15px, 1.6vw, 22px);
+  letter-spacing: 0.06em;
+  line-height: 1.5;
+  max-width: 82vw;
+  color: rgba(255, 255, 255, 0.92);
+  text-shadow: 0 0 12px rgba(255, 255, 255, 0.45);
+}
+
+.scanline {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -12px;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #ffffff, transparent);
+  transform-origin: center;
+}

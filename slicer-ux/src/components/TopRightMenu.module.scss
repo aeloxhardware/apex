@@ -1,0 +1,69 @@
+.container {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  z-index: 1000;
+  pointer-events: none;
+}
+
+// Espace Prévisualisation : coin bas gauche, juste au-dessus de la barre de statut d'Index.tsx
+// (bottom 12px, ~32px de haut), alignée sur son bord gauche.
+.containerPreview {
+  left: 16px;
+  bottom: 64px;
+  transform: none;
+  align-items: flex-start;
+}
+
+// Pendant l'animation de changement d'espace : origine au coin bas gauche de la fenêtre, la
+// position est entièrement donnée par x / y (voir TopRightMenu.tsx).
+.containerAnimating {
+  left: 0;
+  bottom: 0;
+  transform: none;
+  align-items: flex-start;
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: auto;
+  // Pas de `transition: all` : le déplacement entre espaces est animé par framer-motion
+  // (transform, largeur), qu'une transition CSS ferait traîner.
+  transition: background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+  // Fond, ombre et bord : verre Liquid Glass WebGL dessiné dessous (GlassPanelBackdrop). Seule une
+  // légère teinte reste ici pour la lisibilité du texte.
+  background: rgba(10, 15, 26, 0.04);
+  border: none;
+  border-radius: 20px;
+  padding: 10px 24px;
+  // Largeur en style inline (TopRightMenu.tsx) : `auto` (ajustée au texte), animée seulement au
+  // changement d'espace.
+  max-width: 90vw;
+  white-space: nowrap;
+}
+
+.containerPreview .toolbar {
+  max-width: calc(100vw - 32px);
+}
+
+.secondaryToolbar {
+  min-height: 44px;
+}
+
+.infoDisplayBottom {
+  font-family: 'Oxanium', sans-serif !important;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.9);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: center;
+}

@@ -17,10 +17,13 @@ contient aussi l'inventaire des écarts constatés le 2026-10-25.
 | `apex-ui` | **l'expérience utilisateur** | React, Babylon.js, Electron, noyau natif d'édition (`native/`). |
 | `apex` | **l'application complète** | Rien de nouveau : il combine le moteur et l'interface à des commits épinglés, les contrôle ensemble et publie les releases. Il porte aussi ces règles et le tableau des demandes. |
 
-`apex` contient les deux autres dépôts comme **sous-modules git** : `engine/` (`apex-engine`)
-et `ui/` (`apex-ui`). Le commit de chaque sous-module EST l'épingle (§4.3). On ne modifie
-jamais le code à travers ces sous-modules : un changement se fait dans le dépôt d'origine,
-puis l'épingle avance. Les releases de l'application (exe, dmg, msi, AppImage) se
+`apex` contient une **copie** des deux autres dépôts : `slicer-engine/` (`apex-engine`) et
+`slicer-ux/` (`apex-ui`). La copie est faite par `integration/sync.sh` : fichiers suivis par
+git, moins les sorties, artefacts de compilation et journaux de session listés dans
+`integration/exclude-engine.txt` et `integration/exclude-ux.txt`. Les commits copiés sont
+écrits dans `integration/sources.json` : c'est l'épingle (§4.3). **On ne modifie jamais un
+fichier de `slicer-engine/` ou `slicer-ux/` dans `apex`** : la copie suivante l'effacerait.
+Un changement se fait dans le dépôt d'origine, puis on relance la copie. Les releases de l'application (exe, dmg, msi, AppImage) se
 construisent et se publient depuis `apex`, jamais depuis `apex-ui` ou `apex-engine`.
 
 Le dépôt qui portait autrefois le nom `apex` a été renommé `apex-engine` : c'est le moteur.
@@ -40,7 +43,7 @@ C'est la règle qui évite de saturer une seule session.
    commité (décision D4 de l'interface).
 2. **Un besoin dans l'autre dépôt devient une demande** dans `apex/integration/REQUESTS.md`
    (format en §8). La session de l'autre dépôt la traite à son prochain passage.
-3. **Une session d'intégration** travaille dans `apex`. Elle avance les sous-modules, lance
+3. **Une session d'intégration** travaille dans `apex`. Elle relance la copie (`sync.sh`), lance
    les essais de bout en bout, construit et publie les releases. Elle ne développe aucune
    fonctionnalité. Quand un essai
    échoue, elle ouvre une demande au dépôt responsable au lieu de corriger elle-même.
@@ -110,9 +113,10 @@ son producteur. S'il n'a pas de producteur évident, c'est une question pour l'u
 
 ### 4.3 Épinglage et releases
 
-- Les épingles sont les commits des sous-modules `engine/` et `ui/` d'`apex`. Un commit
-  d'`apex` qui les avance dit, dans son message, les deux commits et le numéro du contrat.
-- Une release se construit **depuis `apex`**, à partir de ses sous-modules, et seulement si
+- Les épingles sont les commits copiés, écrits par `sync.sh` dans `integration/sources.json`.
+  Un commit d'`apex` qui les avance ne contient que la copie et ce fichier, et dit dans son
+  message les deux commits et le numéro du contrat.
+- Une release se construit **depuis `apex`**, à partir de `slicer-engine/` et `slicer-ux/`, et seulement si
   les contrôles du §7 passent. Elle porte la version de l'interface (`apexVersion`), et est
   étiquetée dans `apex` avec cette version (`git tag <apexVersion>`).
 - `apex/RELEASES.md` donne, pour chaque release : la version, la date, le commit
@@ -204,7 +208,7 @@ réel : la cinématique pivot/pointe (moteur `gcode_export.py`, interface `gcode
 - interface : `pnpm lint`, `pnpm build` (qui vérifie la version du contrat, §4.1), le
   `--check` du script de copie, et le rejeu des vecteurs du moteur.
 
-**Dans `apex`, avant d'avancer les sous-modules ou de publier une release** (session
+**Dans `apex`, avant de relancer la copie ou de publier une release** (session
 d'intégration) :
 
 1. le schéma copié dans l'interface est celui du commit moteur épinglé ;

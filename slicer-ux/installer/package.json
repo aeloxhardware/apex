@@ -1,0 +1,53 @@
+{
+  "name": "apex-slicer-installer",
+  "version": "0.0.0",
+  "private": true,
+  "author": "Aelox Hardware",
+  "main": "electron/main.cjs",
+  "scripts": {
+    "dev": "node run-electron.cjs",
+    "build": "electron-builder",
+    "build:payload": "node scripts/make-payload.cjs"
+  },
+  "build": {
+    "appId": "com.aeloxhardware.apexslicer.installer",
+    "productName": "Installateur Apex Slicer",
+    "copyright": "Copyright © Aelox Hardware",
+    "files": [
+      "electron/**/*",
+      "src/**/*"
+    ],
+    "extraResources": [
+      {
+        "from": "../native/build/apex_backdrop.node",
+        "to": "native/apex_backdrop.node"
+      },
+      {
+        "from": "payload",
+        "to": "payload"
+      }
+    ],
+    "directories": {
+      "output": "release"
+    },
+    "win": {
+      "executableName": "apex-installer",
+      "icon": "electron/icon-256.png",
+      "requestedExecutionLevel": "asInvoker",
+      "legalTrademarks": "Aelox Hardware",
+      "target": [
+        {
+          "target": "portable"
+        }
+      ]
+    },
+    "artifactName": "Installateur Apex Slicer.${ext}"
+  },
+  "devDependencies": {
+    "electron": "^44.3.0",
+    "electron-builder": "^26.15.3"
+  },
+  "dependencies": {
+    "@paper-design/shaders": "^0.0.80"
+  }
+}

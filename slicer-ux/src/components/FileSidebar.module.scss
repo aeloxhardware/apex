@@ -1,0 +1,88 @@
+.container {
+  position: fixed;
+  top: 20px;
+  left: 24px;
+  display: flex;
+  align-items: center;
+  z-index: 1000;
+  pointer-events: none;
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  pointer-events: auto;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  
+  background: rgba(10, 15, 26, 0.25);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  border: none;
+  box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.35), 0 4px 16px 0 rgba(0, 0, 0, 0.25);
+  padding: 6px 10px;
+  border-radius: 22px;
+  gap: 6px;
+}
+
+.button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.85);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  outline: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+
+  &:hover:not(:disabled) {
+    color: rgba(255, 255, 255, 1);
+    background: rgba(255, 255, 255, 0.18);
+  }
+}
+
+.configButton {
+  color: #a78bfa;
+  &:hover {
+    background: rgba(167, 139, 250, 0.15) !important;
+  }
+}
+
+.separator {
+  width: 1px;
+  height: 18px;
+  background: rgba(255, 255, 255, 0.2);
+  margin: 0 4px;
+}
+
+// Séparateur + bouton Profils imprimante : hors Préparation/Prévisualisation, le groupe se replie
+// (largeur, fondu, rétrécissement, flou) et la barre se referme dessus, sans à-coup.
+.printerGroup {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 80px;
+  margin-left: 0;
+  opacity: 1;
+  transform: scale(1);
+  filter: blur(0);
+  transition:
+    max-width 0.45s cubic-bezier(0.65, 0, 0.35, 1),
+    margin-left 0.45s cubic-bezier(0.65, 0, 0.35, 1),
+    opacity 0.3s ease,
+    transform 0.45s cubic-bezier(0.65, 0, 0.35, 1),
+    filter 0.35s ease;
+}
+
+.printerGroupHidden {
+  max-width: 0;
+  margin-left: -6px; // compense le gap de .toolbar : plus aucun vide à la place du groupe
+  opacity: 0;
+  transform: scale(0.4);
+  filter: blur(6px);
+  overflow: hidden;
+  pointer-events: none;
+}

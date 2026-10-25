@@ -1,0 +1,307 @@
+<!doctype html>
+<html lang="fr" class="boot">
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; script-src 'self'" />
+  <title>Installation — Apex Slicer</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Inter:wght@400;500;600&display=swap" />
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <div class="app">
+    <div class="windowSurface">
+    <!-- Fond degrade meshique reactif au son (voir mesh-background.js,
+         @paper-design/shaders) : plein-cadre, derriere tout le reste
+         (z-index en CSS). ShaderMount cree son propre <canvas> WebGL a
+         l'interieur de cette div et le redimensionne pour la remplir. -->
+    <div id="meshBackground" class="meshBackground"></div>
+    <!-- Bande de drag dediee : seule zone deplacant la fenetre (voir
+         .dragHandle, -webkit-app-region: drag). Ne recouvre aucun bouton,
+         contrairement a l'ancien drag sur toute .windowSurface qui rendait
+         hover/clic morts partout sous Electron+Windows. -->
+    <div class="dragHandle"></div>
+    <button class="closeBtn" data-action="quit" type="button" aria-label="Fermer">✕</button>
+    <!-- Bouton dev uniquement : rejoue les animations de l'ecran courant sans
+         fermer/rouvrir l'app. A retirer avant la release finale. -->
+    <button class="devReplayBtn" data-action="dev-replay" type="button" title="Rejouer les animations (touche R)">⟲</button>
+    <!-- Etape 0 : intro / logo anime -->
+    <section class="screen" data-screen="intro">
+      <div class="logoRing">
+        <img class="logoMark" src="./res/logo.svg" alt="Apex Slicer" />
+      </div>
+      <!-- Bloc de texte unique : "Apex Slicer / Assistant d'installation",
+           affiche des le debut de l'ecran intro. Le bloc "Aelox Hardware /
+           Chargement en cours" et le crossfade associe (introTextPre/Post,
+           voir styles.css) ont ete retires. -->
+      <div class="introTextSwap">
+        <div class="introTextPost">
+          <h1 class="brandTitle">Apex Slicer</h1>
+          <p class="brandSubtitle">Assistant d'installation</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Etape 1 : bienvenue + dossier -->
+    <section class="screen" data-screen="welcome">
+      <header class="screenHeader">
+        <h2 class="animItem">Bienvenue</h2>
+        <p class="screenLead animItem">Cet assistant va installer Apex Slicer sur votre ordinateur.</p>
+      </header>
+
+      <div class="field">
+        <label class="fieldLabel" for="install-path">Dossier d'installation</label>
+        <div class="pathRow">
+          <input id="install-path" class="pathInput" type="text" readonly />
+          <button class="btn btnGhost" data-action="choose-directory" type="button">Parcourir…</button>
+        </div>
+      </div>
+
+      <footer class="screenFooter">
+        <button class="btn btnGhost" data-action="quit" type="button">Annuler</button>
+        <button class="btn btnPrimary" data-action="go-options" type="button">Suivant</button>
+      </footer>
+    </section>
+
+    <!-- Etape 2 : options -->
+    <section class="screen" data-screen="options">
+      <header class="screenHeader">
+        <h2 class="animItem">Options</h2>
+        <p class="screenLead animItem">Choisissez les raccourcis à créer.</p>
+      </header>
+
+      <div class="optionList">
+        <label class="optionRow">
+          <input type="checkbox" id="opt-desktop" checked />
+          <span class="optionCheck"></span>
+          <span class="optionText">Créer un raccourci sur le Bureau</span>
+        </label>
+        <label class="optionRow">
+          <input type="checkbox" id="opt-start-menu" checked />
+          <span class="optionCheck"></span>
+          <span class="optionText">Ajouter au menu Démarrer</span>
+        </label>
+      </div>
+
+      <footer class="screenFooter">
+        <button class="btn btnGhost" data-action="go-welcome" type="button">Précédent</button>
+        <button class="btn btnPrimary" data-action="go-plan" type="button">Suivant</button>
+      </footer>
+    </section>
+
+    <!-- Etape 2b : choix du plan d'interface. Systeme de "cartes" cliquables
+         (pas des cases a cocher) : une seule selectionnee a la fois, comme
+         un choix radio, mais chaque carte porte son propre titre, sa
+         recommandation d'usage et sa liste de fonctions - voir .planCard. -->
+    <section class="screen" data-screen="plan">
+      <header class="screenHeader">
+        <h2 class="animItem">Interface</h2>
+        <p class="screenLead animItem">Choisissez le plan d'interface adapté à votre machine.</p>
+      </header>
+
+      <div class="planList" data-role="plan-list">
+        <button class="planCard animItem" data-plan="economique" type="button" aria-pressed="false">
+          <span class="planCardHeader">
+            <span class="planTitle">Économique</span>
+            <span class="planRecommend">Recommandé pour les petits PC</span>
+          </span>
+          <ul class="planFeatures">
+            <li>Interface noir et blanc, styles Windows par défaut</li>
+            <li>Aucun effet graphique</li>
+            <li>Consommation minimale en RAM et GPU</li>
+          </ul>
+        </button>
+
+        <button class="planCard animItem" data-plan="pro" type="button" aria-pressed="false">
+          <span class="planCardHeader">
+            <span class="planTitle">Pro</span>
+            <span class="planRecommend">Recommandé pour un usage quotidien</span>
+          </span>
+          <ul class="planFeatures">
+            <li>Interface ergonomique, éléments flottants</li>
+            <li>Aucun effet graphique superflu</li>
+            <li>Bon compromis confort / performance</li>
+          </ul>
+        </button>
+
+        <button class="planCard animItem" data-plan="ultimate" type="button" aria-pressed="false">
+          <span class="planCardHeader">
+            <span class="planTitle">Ultimate</span>
+            <span class="planRecommend">Recommandé pour PC récents</span>
+          </span>
+          <ul class="planFeatures">
+            <li>Interface complète (celle de cet assistant)</li>
+            <li>Flou, transparence et animations</li>
+            <li>Expérience visuelle la plus aboutie</li>
+          </ul>
+        </button>
+      </div>
+
+      <footer class="screenFooter">
+        <button class="btn btnGhost" data-action="go-options" type="button">Précédent</button>
+        <button class="btn btnPrimary" data-action="go-nonplanar" type="button">Suivant</button>
+      </footer>
+    </section>
+
+    <!-- Etape 2c : moteur de tranchage non-planaire, avec sous-option
+         4/5 axes qui ne se revele que si le moteur est active. Meme
+         systeme de cartes Oui/Non (pas de case a cocher) que l'ecran
+         precedent, pour rester coherent. -->
+    <section class="screen" data-screen="nonplanar">
+      <header class="screenHeader">
+        <h2 class="animItem">Tranchage non-planaire</h2>
+        <p class="screenLead animItem">Installer le moteur de tranchage non-planaire ?</p>
+      </header>
+
+      <div class="choiceList" data-role="nonplanar-choice">
+        <button class="choiceCard animItem" data-choice="yes" type="button" aria-pressed="false">
+          <span class="choiceTitle">Oui</span>
+          <span class="choiceDesc">Active le tranchage non-planaire (surfaces courbes, coques variables).</span>
+        </button>
+        <button class="choiceCard animItem" data-choice="no" type="button" aria-pressed="false">
+          <span class="choiceTitle">Non</span>
+          <span class="choiceDesc">N'installe pas ce moteur. Modifiable plus tard depuis les paramètres.</span>
+        </button>
+      </div>
+
+      <div class="choiceSubBlock">
+        <p class="choiceSubLabel">Installer aussi l'option de tranchage 4/5 axes ?</p>
+        <p class="choiceSubHint" data-role="axis-hint" hidden>
+          Le tranchage non-planaire est un prérequis pour cette option.
+        </p>
+        <div class="choiceList choiceSubList" data-role="axis-choice">
+          <button class="choiceCard animItem" data-choice="yes" type="button" aria-pressed="false" disabled>
+            <span class="choiceTitle">Oui</span>
+            <span class="choiceDesc">Ajoute le tranchage multi-axes pour têtes/plateaux rotatifs.</span>
+          </button>
+          <button class="choiceCard animItem" data-choice="no" type="button" aria-pressed="true" disabled>
+            <span class="choiceTitle">Non</span>
+            <span class="choiceDesc">Reste en tranchage non-planaire 3 axes uniquement.</span>
+          </button>
+        </div>
+      </div>
+
+      <footer class="screenFooter">
+        <button class="btn btnGhost" data-action="go-plan" type="button">Précédent</button>
+        <button class="btn btnPrimary" data-action="go-modeler" type="button">Suivant</button>
+      </footer>
+    </section>
+
+    <!-- Etape 2d : modelisateur 3D inclus. -->
+    <section class="screen" data-screen="modeler">
+      <header class="screenHeader">
+        <h2 class="animItem">Modélisateur</h2>
+        <p class="screenLead animItem">Installer le modélisateur 3D inclus dans Apex ?</p>
+      </header>
+
+      <div class="choiceList" data-role="modeler-choice">
+        <button class="choiceCard animItem" data-choice="yes" type="button" aria-pressed="false">
+          <span class="choiceTitle">Oui</span>
+          <span class="choiceDesc">Créez et modifiez vos modèles sans quitter Apex Slicer.</span>
+        </button>
+        <button class="choiceCard animItem" data-choice="no" type="button" aria-pressed="false">
+          <span class="choiceTitle">Non</span>
+          <span class="choiceDesc">N'installe pas le modélisateur. Modifiable plus tard.</span>
+        </button>
+      </div>
+
+      <footer class="screenFooter">
+        <button class="btn btnGhost" data-action="go-nonplanar" type="button">Précédent</button>
+        <button class="btn btnPrimary" data-action="go-install" type="button">Installer</button>
+      </footer>
+    </section>
+
+    <!-- Etape 3 : progression -->
+    <section class="screen" data-screen="progress">
+      <header class="screenHeader">
+        <h2 class="animItem">Installation en cours</h2>
+        <p class="screenLead animItem" data-role="progress-label">Préparation…</p>
+      </header>
+
+      <div class="progressBarTrack">
+        <div class="progressBarFill" data-role="progress-fill" style="width: 0%"></div>
+      </div>
+      <p class="progressCount" data-role="progress-count">0 / 0</p>
+    </section>
+
+    <!-- Etape 4 : fin -->
+    <section class="screen" data-screen="done">
+      <div class="doneCheck">
+        <svg viewBox="0 0 52 52" class="doneCheckSvg">
+          <circle class="doneCheckCircle" cx="26" cy="26" r="24" fill="none" />
+          <path class="doneCheckMark" fill="none" d="M14 27l7 7 17-17" />
+        </svg>
+      </div>
+      <h2 class="doneTitle">Installation terminée</h2>
+      <p class="screenLead">Apex Slicer est prêt à être utilisé.</p>
+
+      <label class="optionRow optionRowCentered">
+        <input type="checkbox" id="opt-launch-now" checked />
+        <span class="optionCheck"></span>
+        <span class="optionText">Lancer Apex Slicer maintenant</span>
+      </label>
+
+      <footer class="screenFooter">
+        <button class="btn btnPrimary" data-action="finish" type="button">Terminer</button>
+      </footer>
+    </section>
+    </div>
+
+    <!-- Alerte critique affichee sur TOUT clic sur la croix de fermeture,
+         quel que soit l'ecran actif : empile des triangles "attention"
+         equilateraux a coins arrondis (voir .alertTriangles, de moins en
+         moins visibles en s'eloignant du triangle central) au-dessus d'une
+         confirmation, joue le son critique en boucle et lit le message a
+         voix haute (voir showCriticalAlert() dans renderer.js). Cachee par
+         defaut. Meme <path> equilateral/arrondi reutilise pour les 7
+         triangles (--tx en inline pilote leur ecart horizontal final, voir
+         l'animation dans styles.css) - seul le triangle central (indice 0)
+         recoit en plus la barre + le point du "!". -->
+    <div class="confirmOverlay criticalOverlay" data-role="close-confirm" hidden>
+      <svg class="alertTriangles" viewBox="-350 -60 700 120" aria-hidden="true">
+        <g class="alertTri alertTri-3 alertTri-left3">
+          <path d="M 4.50 -34.21 L 31.87 13.21 Q 36.37 21.00 27.37 21.00 L -27.37 21.00 Q -36.37 21.00 -31.87 13.21 L -4.50 -34.21 Z" />
+        </g>
+        <g class="alertTri alertTri-2 alertTri-left2">
+          <path d="M 4.50 -34.21 L 31.87 13.21 Q 36.37 21.00 27.37 21.00 L -27.37 21.00 Q -36.37 21.00 -31.87 13.21 L -4.50 -34.21 Z" />
+        </g>
+        <g class="alertTri alertTri-1 alertTri-left1">
+          <path d="M 4.50 -34.21 L 31.87 13.21 Q 36.37 21.00 27.37 21.00 L -27.37 21.00 Q -36.37 21.00 -31.87 13.21 L -4.50 -34.21 Z" />
+        </g>
+        <g class="alertTri alertTri-0 alertTri-center">
+          <path d="M 4.50 -34.21 L 31.87 13.21 Q 36.37 21.00 27.37 21.00 L -27.37 21.00 Q -36.37 21.00 -31.87 13.21 L -4.50 -34.21 Z" />
+          <rect x="-4" y="-14" width="8" height="22" rx="3" />
+          <circle cx="0" cy="13" r="4" />
+        </g>
+        <g class="alertTri alertTri-1 alertTri-right1">
+          <path d="M 4.50 -34.21 L 31.87 13.21 Q 36.37 21.00 27.37 21.00 L -27.37 21.00 Q -36.37 21.00 -31.87 13.21 L -4.50 -34.21 Z" />
+        </g>
+        <g class="alertTri alertTri-2 alertTri-right2">
+          <path d="M 4.50 -34.21 L 31.87 13.21 Q 36.37 21.00 27.37 21.00 L -27.37 21.00 Q -36.37 21.00 -31.87 13.21 L -4.50 -34.21 Z" />
+        </g>
+        <g class="alertTri alertTri-3 alertTri-right3">
+          <path d="M 4.50 -34.21 L 31.87 13.21 Q 36.37 21.00 27.37 21.00 L -27.37 21.00 Q -36.37 21.00 -31.87 13.21 L -4.50 -34.21 Z" />
+        </g>
+      </svg>
+
+      <!-- Boutons flottants SOUS la boite (pas dedans) : voir .criticalActions,
+           separee de .criticalBox pour ne pas partager son fond/flou. -->
+      <div class="criticalStack">
+        <div class="confirmBox criticalBox">
+          <p class="confirmTitle criticalTitle">Attention</p>
+          <p class="confirmText">
+            Vous êtes sur le point d'annuler l'installation du logiciel Apex Slicer.<br />
+            Êtes-vous certain de vouloir continuer ?
+          </p>
+        </div>
+        <div class="confirmActions criticalActions">
+          <button class="btn btnGhost" data-action="close-confirm-stay" type="button">Continuer l'installation</button>
+          <button class="btn btnDanger" data-action="close-confirm-quit" type="button">Annuler l'installation</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="./renderer.js"></script>
+  <script type="module" src="./mesh-background.js"></script>
+</body>
+</html>

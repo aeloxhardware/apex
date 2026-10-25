@@ -92,14 +92,19 @@ Les demandes R-001 à R-011 viennent de l'inventaire du 2026-10-25 (`apex-engine
 - État : question à l'utilisateur — embarquer un Python complet avec le moteur, ou attendre un
   exécutable natif du moteur.
 
-### R-012 — Monter `apex` : sous-modules et première release
+### R-012 — Monter `apex` : copie des deux dépôts et première release
 - De : apex | À : apex | Contrat : — | Ouverte : 2026-10-25
-- Besoin : ajouter `engine/` et `ui/` comme sous-modules, créer `apex/RELEASES.md`, et
-  déplacer la construction des exécutables (`electron:build`) vers `apex` (RULES §1, §4.3).
-- Constat : `apex` ne contient que LICENSE, README, `CLAUDE.md` et `integration/` ; la
-  construction des exécutables est aujourd'hui dans `apex-ui` (`package.json`).
-- État : ouverte. Les deux dépôts sont privés ou publics selon le cas (`apex-engine` public,
-  `apex-ui` privé) : la construction des releases devra pouvoir lire `apex-ui`.
+- Besoin : copier le moteur et l'interface dans `slicer-engine/` et `slicer-ux/`, créer
+  `apex/RELEASES.md`, et déplacer la construction des exécutables (`electron:build`) vers
+  `apex` (RULES §1, §4.3).
+- Fait (2026-10-25) : première copie par `integration/sync.sh`, `apex-engine@6e0081e` et
+  `apex-ui@b57fb2b` (`integration/sources.json`), 1 910 fichiers, 61 Mo. Exclus : sorties
+  (`out/`, GLB et GIF de la racine), artefacts de compilation (`build/`, `cpp/build/`,
+  `cpp/lib/`), journaux de session (`claude_context/`), et les dossiers que les deux dépôts
+  déclarent ignorés mais contiennent quand même (`research/`, `icons-main/`).
+- Reste : `RELEASES.md` ; construire les exécutables depuis `slicer-ux/` en y joignant le
+  moteur (dépend de R-011) ; lancer la suite de tests du moteur dans la copie.
+- État : en cours.
 
 ### R-013 — Plusieurs pièces sur le plateau, par défaut
 - De : utilisateur | À : apex-engine, puis apex-ui | Contrat : C1 | Ouverte : 2026-10-25

@@ -1,0 +1,18 @@
+# Chemins du moteur (apex-engine) NON copiés dans apex/slicer-engine :
+# sorties de calcul, artefacts de compilation, journaux de session Claude.
+# Motifs ancrés à la racine du dépôt source ; `*` couvre aussi les `/`.
+out
+build
+cpp/build
+cpp/lib
+claude_context
+# research/ est ignoré par le .gitignore du moteur (« reste non versionné »).
+research
+__pycache__
+*/__pycache__
+.pytest_cache
+death_trajectory.glb
+l_triple_axis_trajectory.glb
+out_*.glb
+real_overhang_transition20.gif
+tetgen-tmpfile_skipped.*
