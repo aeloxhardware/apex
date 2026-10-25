@@ -92,10 +92,19 @@ Les demandes R-001 à R-011 viennent de l'inventaire du 2026-10-25 (`apex-engine
 - État : question à l'utilisateur — embarquer un Python complet avec le moteur, ou attendre un
   exécutable natif du moteur.
 
+### R-012 — Monter `apex` : sous-modules et première release
+- De : apex | À : apex | Contrat : — | Ouverte : 2026-10-25
+- Besoin : ajouter `engine/` et `ui/` comme sous-modules, créer `apex/RELEASES.md`, et
+  déplacer la construction des exécutables (`electron:build`) vers `apex` (RULES §1, §4.3).
+- Constat : `apex` ne contient que LICENSE, README, `CLAUDE.md` et `integration/` ; la
+  construction des exécutables est aujourd'hui dans `apex-ui` (`package.json`).
+- État : ouverte. Les deux dépôts sont privés ou publics selon le cas (`apex-engine` public,
+  `apex-ui` privé) : la construction des releases devra pouvoir lire `apex-ui`.
+
 ## Fermées
 
 ### R-001 — Sort de la copie du moteur dans `apex`
 - De : apex | À : utilisateur | Contrat : — | Ouverte : 2026-10-25
-- Besoin : `apex` doit être le terrain de jeu, sans copie du moteur.
-- État : faite (2026-10-25, réponse de l'utilisateur) — `apex` est un dépôt neuf (LICENSE,
-  README) ; l'ancien `apex` est devenu `apex-engine`.
+- Besoin : savoir ce que contient `apex`.
+- État : faite (2026-10-25, réponse de l'utilisateur) — `apex` est la combinaison du moteur et
+  de l'interface, avec les releases ; l'ancien `apex` est devenu `apex-engine`.

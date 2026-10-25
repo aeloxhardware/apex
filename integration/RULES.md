@@ -15,12 +15,17 @@ contient aussi l'inventaire des écarts constatés le 2026-10-25.
 |---|---|---|
 | `apex-engine` | **le moteur** | Python (`pipeline/`, `core/`, `file_io/`, `main.py`) et noyau C++ (`cpp/`). Tranchage, export G-code, paramètres. |
 | `apex-ui` | **l'expérience utilisateur** | React, Babylon.js, Electron, noyau natif d'édition (`native/`). |
-| `apex` | **le terrain de jeu** | Ces règles, le tableau des demandes, l'épinglage des versions, les essais de bout en bout, la construction des versions publiées. |
+| `apex` | **l'application complète** | Rien de nouveau : il combine le moteur et l'interface à des commits épinglés, les contrôle ensemble et publie les releases. Il porte aussi ces règles et le tableau des demandes. |
 
-`apex` ne contient ni le code du moteur ni celui de l'interface : seulement ces règles, les
-demandes, les épingles et les essais d'intégration. Le dépôt qui portait autrefois le nom
-`apex` a été renommé `apex-engine` : c'est le moteur. GitHub redirigeait encore l'ancien nom
-vers lui le 2026-10-25, d'où une erreur d'attribution (§2, point 6).
+`apex` contient les deux autres dépôts comme **sous-modules git** : `engine/` (`apex-engine`)
+et `ui/` (`apex-ui`). Le commit de chaque sous-module EST l'épingle (§4.3). On ne modifie
+jamais le code à travers ces sous-modules : un changement se fait dans le dépôt d'origine,
+puis l'épingle avance. Les releases de l'application (exe, dmg, msi, AppImage) se
+construisent et se publient depuis `apex`, jamais depuis `apex-ui` ou `apex-engine`.
+
+Le dépôt qui portait autrefois le nom `apex` a été renommé `apex-engine` : c'est le moteur.
+GitHub redirigeait encore l'ancien nom vers lui le 2026-10-25, d'où une erreur d'attribution
+(§2, point 6).
 
 ---
 
@@ -35,8 +40,9 @@ C'est la règle qui évite de saturer une seule session.
    commité (décision D4 de l'interface).
 2. **Un besoin dans l'autre dépôt devient une demande** dans `apex/integration/REQUESTS.md`
    (format en §8). La session de l'autre dépôt la traite à son prochain passage.
-3. **Une session d'intégration** travaille dans `apex`. Elle épingle les versions, lance les
-   essais de bout en bout et publie. Elle ne développe aucune fonctionnalité. Quand un essai
+3. **Une session d'intégration** travaille dans `apex`. Elle avance les sous-modules, lance
+   les essais de bout en bout, construit et publie les releases. Elle ne développe aucune
+   fonctionnalité. Quand un essai
    échoue, elle ouvre une demande au dépôt responsable au lieu de corriger elle-même.
 4. **Ce qu'une session lit de l'autre côté** : seulement le contrat (§3) et les fichiers qu'il
    désigne. Elle ne charge pas le `CLAUDE.md` complet de l'autre dépôt : c'est ce qui sature.
@@ -102,16 +108,21 @@ son producteur. S'il n'a pas de producteur évident, c'est une question pour l'u
   de pivot, un rayon de plateau). Si l'interface en a besoin, elle demande au producteur de
   l'ajouter au contrat (§8).
 
-### 4.3 Épinglage et version publiée
+### 4.3 Épinglage et releases
 
-- `apex/integration/pins.json` (à créer à la première intégration) donne, pour chaque
-  version publiée de l'application : le commit d'`apex-engine`, le commit d'`apex-ui`, le
-  numéro du contrat et la version Apex de l'interface (`apexVersion`).
-- Une version publiée se construit **depuis `apex`**, à partir des deux commits épinglés, et
-  seulement si les contrôles du §7 passent.
+- Les épingles sont les commits des sous-modules `engine/` et `ui/` d'`apex`. Un commit
+  d'`apex` qui les avance dit, dans son message, les deux commits et le numéro du contrat.
+- Une release se construit **depuis `apex`**, à partir de ses sous-modules, et seulement si
+  les contrôles du §7 passent. Elle porte la version de l'interface (`apexVersion`), et est
+  étiquetée dans `apex` avec cette version (`git tag <apexVersion>`).
+- `apex/RELEASES.md` donne, pour chaque release : la version, la date, le commit
+  d'`apex-engine`, celui d'`apex-ui` et le numéro du contrat. L'historique des fonctions
+  reste dans `apex-ui/RELEASES.md`.
 - Les épingles n'avancent que si les deux côtés passent les contrôles avec le même numéro de
-  contrat. Un côté peut être en avance sur l'autre en développement ; jamais dans une version
-  publiée.
+  contrat. Un côté peut être en avance sur l'autre en développement ; jamais dans une
+  release.
+- Le compteur « Builds » de la version Apex se remet à zéro à une version compilée rendue
+  publique : c'est désormais une release d'`apex`.
 
 ---
 
@@ -193,7 +204,8 @@ réel : la cinématique pivot/pointe (moteur `gcode_export.py`, interface `gcode
 - interface : `pnpm lint`, `pnpm build` (qui vérifie la version du contrat, §4.1), le
   `--check` du script de copie, et le rejeu des vecteurs du moteur.
 
-**Dans `apex`, avant d'avancer les épingles** (session d'intégration) :
+**Dans `apex`, avant d'avancer les sous-modules ou de publier une release** (session
+d'intégration) :
 
 1. le schéma copié dans l'interface est celui du commit moteur épinglé ;
 2. un tranchage réel par le protocole du §5, sur les quatre modèles de référence du moteur ;
@@ -236,8 +248,8 @@ Une demande s'écrit dans `REQUESTS.md`, une entrée par besoin :
   s'il est incompatible, `[contrat C1, v<N>]`.
 - Le moteur tient le journal des changements du contrat (numéro, date, élément, ce qui change
   pour le consommateur) dans un `CONTRACT_CHANGES.md` à sa racine.
-- Une version publiée de l'application porte la version de l'interface ; `pins.json` dit quel
-  moteur elle contient.
+- Une release porte la version de l'interface ; `apex/RELEASES.md` dit quel moteur et quelle
+  interface elle contient (§4.3).
 
 ---
 
