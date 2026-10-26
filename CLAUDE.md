@@ -14,3 +14,4 @@ Toute session qui travaille sur l'un des trois dépôts lit d'abord :
 - [`integration/RULES.md`](integration/RULES.md) : règles de développement séparé, contrat,
   releases ;
 - [`integration/REQUESTS.md`](integration/REQUESTS.md) : demandes ouvertes entre dépôts.
+- [`ROADMAP.md`](ROADMAP.md) : ce qui est prévu pour l'application complète.

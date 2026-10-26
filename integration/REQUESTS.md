@@ -167,6 +167,20 @@ Les demandes R-001 à R-011 viennent de l'inventaire du 2026-10-25 (`apex-engine
   pièces sans que personne le voie.
 - État : question à l'utilisateur (oui / non, et le seuil).
 
+### R-016 — Message d'erreur : surface du modèle incohérente
+- De : utilisateur | À : apex-engine, apex-ui | Contrat : C2 | Ouverte : 2026-10-26
+- Besoin : quand la surface du modèle est trop abîmée pour que le maillage volumique distingue
+  l'intérieur de l'extérieur, le moteur refuse le modèle (code de sortie 3, RULES §5.2) avec un
+  résultat structuré, et l'interface affiche le message validé par l'utilisateur (texte, règles
+  d'accord en nombre et seuils : `ROADMAP.md`, « Messages d'erreur de l'utilisateur »).
+- Constat : le prototype de mailleur (`apex-engine/tetranet/`) renvoie déjà un statut
+  `InconsistentSurface` et le diagnostic chiffré (trous, faces retournées, arêtes partagées, faces
+  en double, points incohérents) ; le message français accordé est dans
+  `tetranet/tools/diagnosis_message.py`. Les auto-intersections viennent de l'étape 1 du moteur.
+- À faire : moteur — champ de résultat (type de défaut + nombres) et refus avec ce statut ;
+  interface — afficher le texte, le même dans les deux langues prévues, accords compris.
+- État : ouverte.
+
 ## Fermées
 
 ### R-011 — Python embarqué et dépendances du moteur
