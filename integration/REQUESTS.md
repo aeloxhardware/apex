@@ -12,7 +12,9 @@ Les demandes R-001 à R-011 viennent de l'inventaire du 2026-10-25 (`apex-engine
 - De : apex | À : apex-engine | Contrat : C1 | Ouverte : 2026-10-25
 - Besoin : `scripts/gen_params.py` écrit `x-apex-contract` (entier) dans
   `config/params.schema.json` ; le moteur crée `CONTRACT_CHANGES.md` (RULES §4.1, §9).
-- État : ouverte.
+- État : **faite côté moteur le 2026-10-26** (`apex-engine`) : `APEX_CONTRACT_VERSION = 1` dans
+  `config/schema.py`, clé `x-apex-contract` écrite par `scripts/gen_params.py`, `CONTRACT_CHANGES.md`
+  créé. Reste : `apex` copie le schéma (sync) et l'interface lit le numéro (R-005).
 
 ### R-003 — Interface en ligne de commande du tranchage
 - De : apex-ui | À : apex-engine | Contrat : C2, C3 | Ouverte : 2026-10-25
@@ -20,7 +22,23 @@ Les demandes R-001 à R-011 viennent de l'inventaire du 2026-10-25 (`apex-engine
 - Constat : `main.py` ne prend que des options de ligne de commande isolées (`--resolution`,
   `--layer-height`, `--output-gcode`…), sans requête JSON, sans progression ni résultat
   structurés.
-- État : ouverte.
+- État : **faite côté moteur le 2026-10-26**, à valider par l'interface (R-004). `python main.py steps` et
+  `python main.py slice --request <requete.json>` (`apex-engine/slice_cli.py`, tests
+  `tests/test_slice_cli.py`) :
+  - requête : `contract`, `mesh`, `output_dir`, `output_name` (facultatif), `params` (`PipelineParams`
+    partiel), `gcode_params` (`GcodeParams` partiel) ; un champ inconnu à n'importe quel niveau, ou un
+    numéro de contrat différent, donne le code 2 ;
+  - sortie d'erreur : lignes JSON `{"type":"step","slug","fraction"}` (0 au début, 1 à la fin de
+    chacune des 11 étapes, `export` comprise) et `{"type":"log","level","code","message"}` ; le journal
+    libre du pipeline y est aussi envoyé ;
+  - sortie standard : une seule ligne, l'objet résultat (`status` : `ok`, `invalid_request`,
+    `model_refused`, `surface_inconsistent`, `export_refused`, `error` ; `gcode`, `report`,
+    `placement_offset_z`, comptes, `warnings`) ;
+  - codes : 0 réussi, 2 requête invalide, 3 modèle refusé (dont R-016 et le refus de l'export strict),
+    1 plantage ; G-code écrit en `.part` puis renommé.
+  - **Limites connues** : (1) pas de fraction intermédiaire à l'intérieur d'une étape (le moteur ne
+    rend pas la main avant d'avoir fini) : la barre avance par étape, sans estimation ; (2) la
+    commande est `python main.py` tant que l'exécutable natif sans Python n'existe pas (R-014).
 
 ### R-004 — Brancher le vrai tranchage dans l'interface
 - De : apex | À : apex-ui | Contrat : C2, C3 | Ouverte : 2026-10-25
