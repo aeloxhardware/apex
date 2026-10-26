@@ -124,6 +124,12 @@ son producteur. S'il n'a pas de producteur évident, c'est une question pour l'u
 - `apex/RELEASES.md` donne, pour chaque release : la version, la date, le commit
   d'`apex-engine`, celui d'`apex-ui` et le numéro du contrat. L'historique des fonctions
   reste dans `apex-ui/RELEASES.md`.
+- La copie n'emporte **pas l'historique git** des deux dépôts (décision de l'utilisateur,
+  2026-10-26) : l'historique se lit dans `apex-engine` et `apex-ui`, à partir des commits
+  notés dans `integration/sources.json`.
+- **Pré-release ou release** (décision de l'utilisateur, 2026-10-26) : une version publiée
+  sans impression réelle d'une pièce de test est une **pré-release** GitHub ; elle ne devient
+  une **release** qu'après une impression réussie (§7, contrôle 8).
 - Les épingles n'avancent que si les deux côtés passent les contrôles avec le même numéro de
   contrat. Un côté peut être en avance sur l'autre en développement ; jamais dans une
   release.
@@ -146,8 +152,9 @@ détails (noms exacts des champs) sont fixés par le moteur, qui les publie dans
 - Les échanges passent par des **fichiers** et des **lignes de texte**, jamais par de la
   mémoire partagée.
 - Commande : `<moteur> slice --request <requete.json>`. `<moteur>` est aujourd'hui
-  `python main.py` ; plus tard un exécutable natif. L'interface ne dépend que de la commande,
-  pas de ce qui l'exécute.
+  `python main.py` ; dans toute version publiée, c'est un **exécutable natif sans Python**
+  (décision de l'utilisateur, 2026-10-26 : ni Python embarqué ni Python figé, R-011 et R-014).
+  L'interface ne dépend que de la commande, pas de ce qui l'exécute.
 
 ### 5.2 Requête et résultat
 
@@ -167,6 +174,11 @@ détails (noms exacts des champs) sont fixés par le moteur, qui les publie dans
 - Le moteur écrit sa progression sur la **sortie d'erreur**, une ligne JSON par événement :
   `{"type": "step", "slug": "...", "fraction": 0.42}`, `{"type": "log", "level": "...",
   "message": "..."}`. Les autres lignes de la sortie d'erreur sont des journaux libres.
+- **La barre de progression de l'interface suit ces lignes, et rien d'autre** (décision de
+  l'utilisateur, 2026-10-26) : jamais une minuterie, jamais une durée estimée qui avance seule.
+  Sans nouvelle ligne du moteur, la barre ne bouge pas. Le moteur émet donc une ligne au début
+  de chaque étape et, dans les étapes longues (tétraédrisation, champ, remplissage, collisions),
+  des fractions intermédiaires réelles (couches traitées, points contrôlés…).
 - `<moteur> steps` rend la liste des étapes (`slug`, libellé) du chemin par défaut. C'est C3 :
   l'interface l'affiche, elle n'invente pas d'étape.
 - Annuler = arrêter le processus. Le moteur ne laisse alors aucun G-code incomplet.
@@ -210,14 +222,31 @@ réel : la cinématique pivot/pointe (moteur `gcode_export.py`, interface `gcode
 - interface : `pnpm lint`, `pnpm build` (qui vérifie la version du contrat, §4.1), le
   `--check` du script de copie, et le rejeu des vecteurs du moteur.
 
-**Dans `apex`, avant de relancer la copie ou de publier une release** (session
+**Python reste la référence tant que le portage n'est pas fini** (décision de l'utilisateur,
+2026-10-26). Les tests d'équivalence du moteur comparent le natif au Python ; les tests en
+échec connus (dépendants d'une version de tetgen, code voué au retrait) sont traités quand
+tout sera porté, pas avant. Ils restent listés dans le compte rendu, jamais masqués.
+
+**Dans `apex`, avant de relancer la copie ou de publier une version** (session
 d'intégration) :
 
-1. le schéma copié dans l'interface est celui du commit moteur épinglé ;
-2. un tranchage réel par le protocole du §5, sur les quatre modèles de référence du moteur ;
-3. le G-code produit est relu par le parseur de l'interface, et les positions de la pointe
-   relues concordent avec celles du moteur (tolérance déclarée) ;
-4. l'en-tête chiffré écrit par le moteur se déchiffre avec le code de l'interface.
+1. **version du contrat** : le schéma copié dans l'interface est celui du commit moteur
+   épinglé, et l'interface se construit avec le même numéro de contrat (§4.1) ;
+2. **tranchage réel** par le protocole du §5 (sous-processus, exécutable natif), sur les
+   quatre modèles de référence du moteur ;
+3. **relecture croisée** : le G-code produit est relu par le parseur de l'interface, et les
+   positions de la pointe relues concordent avec celles du moteur (tolérance déclarée) ;
+4. **en-tête chiffré** : celui écrit par le moteur se déchiffre avec le code de l'interface ;
+5. **progression réelle** : sur ces tranchages, la barre de l'interface n'a avancé que sur des
+   lignes du moteur (§5.3) ;
+6. **pas de recul des résultats** (proposé, à confirmer par l'utilisateur, R-015) : sur les
+   quatre modèles, matière sans appui, matière flottante, collisions de la tête et temps
+   d'impression comparés à la version publiée précédente ; une dégradation au-delà d'un
+   seuil déclaré bloque, sauf si elle est voulue et dite dans `VERSIONS.md` ;
+7. **installation** : l'installateur Windows 64 bits s'installe et tranche un modèle sur une
+   machine Windows propre (sans Python, sans outils de développement) ;
+8. **impression** : une pièce de test imprimée sur la machine avec le G-code de cette
+   version. Sans elle, la version ne sort qu'en **pré-release** (§4.3).
 
 Un contrôle sauté ou impossible est dit dans le compte rendu, jamais passé sous silence.
 

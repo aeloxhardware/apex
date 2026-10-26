@@ -24,7 +24,10 @@ Les demandes R-001 à R-011 viennent de l'inventaire du 2026-10-25 (`apex-engine
 
 ### R-004 — Brancher le vrai tranchage dans l'interface
 - De : apex | À : apex-ui | Contrat : C2, C3 | Ouverte : 2026-10-25
-- Besoin : remplacer la simulation par l'appel du §5, une fois R-003 fait.
+- Besoin : remplacer la simulation par l'appel du §5, une fois R-003 fait. **La barre de
+  progression suit les lignes de progression du moteur et ne doit plus du tout être une
+  minuterie** (décision de l'utilisateur, 2026-10-26 ; RULES §5.3) ; les étapes affichées
+  viennent de `<moteur> steps`.
 - Constat : `SlicingProgressModal.tsx` avance d'une étape toutes les 1 200 ms
   (`STEP_DURATION_MS`) ; `slicingSteps.ts` liste des étapes de la voie Bird (« Déformation du
   maillage tétraédrique »…), retirée du moteur le 2026-10-25.
@@ -96,8 +99,13 @@ Les demandes R-001 à R-011 viennent de l'inventaire du 2026-10-25 (`apex-engine
   chaque release puis automatisée ; dépôts rendus publics au fur et à mesure ; première
   release Windows 64 bits seulement ; binaires natifs compilés sur une machine Windows de
   GitHub Actions, jamais commités.
+- Décisions sur la barrière de qualité (2026-10-26, RULES §4.3 et §7) : version du contrat
+  vérifiée, moteur en sous-processus (exécutable séparé), Python gardé comme référence
+  jusqu'à la fin du portage, relectures croisées automatiques, test d'installation sur une
+  machine Windows propre ; sans impression réelle, **pré-release** seulement, **release**
+  après impression. L'historique git se lit dans les dépôts d'origine.
 - Reste : `RELEASES.md` ; la construction Windows sur GitHub Actions (moteur natif + noyau
-  d'édition + Electron) ; la barrière de qualité du §7.
+  d'édition + Electron) ; les contrôles du §7 ; R-015.
 - État : en cours, release bloquée par R-014.
 
 ### R-013 — Plusieurs pièces sur le plateau, par défaut
@@ -123,24 +131,41 @@ Les demandes R-001 à R-011 viennent de l'inventaire du 2026-10-25 (`apex-engine
 - De : utilisateur | À : apex-engine | Contrat : C2 | Ouverte : 2026-10-26
 - Besoin (décision de l'utilisateur) : la release n'est faite que lorsque le moteur, voie de
   la chaleur comprise, tourne entièrement en C++, sans Python.
-- Constat (`apex-engine@6e0081e`, chemin par défaut) : le moteur n'est PAS 100 % C++.
-  - Orchestration (`main.run_pipeline`) : Python.
-  - Étape 1 : chargement et réparation en Python (trimesh, shapely, networkx, pymeshfix) ;
-    TetGen par son module Python, en sous-processus ; natifs : test d'intersection,
-    segments, topologie des tétraèdres. TetGen doit rester dans un exécutable séparé
-    (limite #56 du moteur).
-  - Étapes 2 et 3 : natives, appelées depuis Python.
-  - Étape 4, chaleur : gradients et motif creux natifs ; **la méthode de la chaleur et la
-    résolution du système sont en Python et scipy** (aucun code natif ne la porte).
-  - Étape 5 : isosurfaces et bords natifs ; ordre et regroupements en Python.
-  - Étape 6 : Python et shapely par défaut ; le remplissage natif (Clipper2) est opt-in
-    (`APEX_NATIVE_FILL`), les ponts restent en Python.
-  - Étape 7 : native. Étape 8 : cinématique inverse native, le reste en numpy.
-  - Étape 9 : contrôle rapide natif. Étape 10 : Python (trimesh).
-  - Export G-code : corps natif ; en-tête, pied et préparation en Python.
-  - Dépendances Python à remplacer : trimesh, scipy, shapely, networkx, rtree, manifold3d,
-    pymeshfix, tetgen.
+- Constat du 2026-10-26 (rescan), branche `apex-engine` `ccr-25ac6a07-1v5ulx`
+  (`4dcc8ac3`, **pas encore fusionnée dans `main`** ; `main` reste à `6e0081e`) : gros
+  progrès, mais le moteur n'est toujours **PAS 100 % C++**.
+  - Devenus natifs (test d'équivalence chacun, limite #82 du moteur) : méthode de la chaleur
+    et CG de Jacobi parallèle (death 6,5 → 2,6 s) ; couches de l'étape 5 en un appel ; tri
+    de 5b ; remplissage de couches entières avec ponts (Clipper2, **actif par défaut**) ;
+    assemblage, normale par point et filtre médian de l'étape 8 ; contrôle de collision par
+    lots (étapes 9 et 10) ; réorientations de l'étape 10 ; en-tête et pied du G-code ;
+    **TetGen compilé depuis sa source, dans un exécutable C++ séparé** (`apex_tetgen_worker`,
+    maillage identique au module Python).
+  - Reste en Python (d'après la limite #82, à confirmer à la fusion) :
+    - l'enchaînement des étapes (`main.py`) et le contrat entre étapes en objets Python
+      (`Layer`, `ToolpathPoint` : 360 000 objets sur death) ; un orchestrateur natif demande
+      de passer ce contrat en tableaux (étapes 8, 8b, 9, 9b, 10, export) ;
+    - étape 1 : chargement et réparation du maillage (trimesh, pymeshfix, manifold3d,
+      shapely, networkx) ; seul TetGen est natif ;
+    - repli par grille de la cinématique inverse (0,14 % des points), échantillonnage de la
+      tête (étape 9, trimesh), boucle `run` et journal de l'étape 10, enveloppe de l'étape 7,
+      motif `OSCILLATING_SPIRAL`, préparation du contrôle des dégagements de l'export ;
+    - voies FEM directionnelle, multibranche, parties planes : vouées au retrait.
+  - Mesure : death @ 0,8, 42 → 33 s (TetGen ~14 s).
+  - Il manque aussi un point d'entrée exécutable natif (R-003).
 - État : ouverte. Bloque R-012.
+
+### R-015 — Barrière « pas de recul des résultats »
+- De : apex | À : utilisateur | Contrat : — | Ouverte : 2026-10-26
+- Besoin : décider si une version peut sortir quand elle tranche moins bien que la
+  précédente (RULES §7, contrôle 6).
+- Proposition : avant chaque version, trancher les quatre modèles de référence et comparer
+  quatre chiffres à la version publiée précédente — matière déposée sans appui, matière
+  flottante, collisions de la tête, temps d'impression. Si l'un se dégrade au-delà d'un
+  seuil (par exemple +10 %), la version est bloquée, sauf si la dégradation est voulue et
+  écrite dans `VERSIONS.md`. Le but : qu'une optimisation ou un portage ne dégrade pas les
+  pièces sans que personne le voie.
+- État : question à l'utilisateur (oui / non, et le seuil).
 
 ## Fermées
 
