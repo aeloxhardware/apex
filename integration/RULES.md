@@ -37,7 +37,9 @@ GitHub redirigeait encore l'ancien nom vers lui le 2026-10-25, d'où une erreur 
 C'est la règle qui évite de saturer une seule session.
 
 1. **Une session Claude écrit dans un seul dépôt.** Elle peut LIRE les deux autres, jamais y
-   écrire, même pour « une ligne ». Précédents : une session interface a modifié
+   écrire, même pour « une ligne ». Seule exception : une session du moteur ou de
+   l'interface écrit dans `apex` le tableau des demandes (`integration/REQUESTS.md`) et le
+   numéro de version (`VERSION`, `VERSIONS.md`, §9), rien d'autre. Précédents : une session interface a modifié
    `gcode_export.py` pendant qu'une session moteur lançait ses tests (limite #74 du moteur),
    et le marqueur `; apex_sliced = 1` a été ajouté au moteur depuis l'interface sans y être
    commité (décision D4 de l'interface).
@@ -117,8 +119,8 @@ son producteur. S'il n'a pas de producteur évident, c'est une question pour l'u
   Un commit d'`apex` qui les avance ne contient que la copie et ce fichier, et dit dans son
   message les deux commits et le numéro du contrat.
 - Une release se construit **depuis `apex`**, à partir de `slicer-engine/` et `slicer-ux/`, et seulement si
-  les contrôles du §7 passent. Elle porte la version de l'interface (`apexVersion`), et est
-  étiquetée dans `apex` avec cette version (`git tag <apexVersion>`).
+  les contrôles du §7 passent. Elle porte le numéro de `apex/VERSION` (§9), et est
+  étiquetée dans `apex` avec ce numéro (`git tag <version>`).
 - `apex/RELEASES.md` donne, pour chaque release : la version, la date, le commit
   d'`apex-engine`, celui d'`apex-ui` et le numéro du contrat. L'historique des fonctions
   reste dans `apex-ui/RELEASES.md`.
@@ -246,14 +248,53 @@ Une demande s'écrit dans `REQUESTS.md`, une entrée par besoin :
 
 ## 9. Commits et versions
 
-- Chaque dépôt garde ses conventions : versionnage `apexVersion` et `RELEASES.md` dans
-  l'interface, DT et limites numérotées dans le moteur.
+### 9.1 Un seul numéro de version, dans `apex`
+
+**Décision de l'utilisateur (2026-10-26) :** l'application a un seul numéro de version, rangé
+dans le dépôt commun, et il change à chaque nouvelle version du moteur comme de l'interface.
+
+- **Source de vérité : `apex/VERSION`** (une ligne). `apex/VERSIONS.md` en garde le journal,
+  une ligne par version : numéro, date, dépôt, commit, ce qui change.
+- **Toute session qui change de version** (moteur ou interface) met à jour, dans `apex`,
+  `VERSION` et `VERSIONS.md`, et pousse ce commit dans le même mouvement que le sien. Elle
+  récupère d'abord le dernier état d'`apex` (`git pull`) : l'autre côté a pu changer le numéro
+  entre-temps. En cas de conflit, on repart du numéro le plus récent et on applique sa
+  propre montée de niveau dessus.
+- **Côté interface**, `apexVersion` dans `package.json` (affiché sur l'écran de démarrage) et
+  `RELEASES.md` (détail des changements de l'interface) restent tenus, et `apexVersion` vaut
+  toujours `apex/VERSION`. **Côté moteur**, le détail reste dans le DT et les limites
+  numérotées.
+- Un commit qui change de version commence son message par le numéro complet
+  (`alpha-0.2.1.4.3.12.1.221 : …`), dans son dépôt comme dans `apex`.
+
+### 9.2 Format du numéro
+
+`<préversion>-<public>.<global>.<majeur>.<moyen>.<mineur>.<add-ins>.<correctif>.<builds>`,
+par exemple `alpha-0.2.1.4.3.11.1.221`. Règles de l'utilisateur (2026-10-08), valables
+désormais pour toute l'application, moteur compris :
+
+- **Préversion** (`alpha`, puis `beta`…) : maturité.
+- **Public** : numéro de version publique, 0 tant que le logiciel est en préversion.
+- **Global** : refonte de tout le logiciel.
+- **Majeur** : nouvel espace de travail, nouveau moteur ou nouvelle méthode de tranchage,
+  fonction importante.
+- **Moyen** : fonctions assez importantes.
+- **Mineur** : fonction notable.
+- **Add-ins** : un bouton, un petit réglage, une petite chose.
+- **Correctif** : correction d'un défaut d'une fonction existante.
+- **Builds** : nombre de constructions depuis la dernière version compilée rendue publique
+  (désormais : la dernière release d'`apex`).
+- Monter un niveau remet à leur valeur de départ les niveaux à sa droite, sauf Builds, qui ne
+  repart qu'à une nouvelle release publique.
+- On versionne le plus finement possible : à chaque changement, et pas seulement aux releases.
+
+### 9.3 Contrat
+
 - Un commit qui change un élément du contrat le dit dans son message : `[contrat C1] …`, et,
   s'il est incompatible, `[contrat C1, v<N>]`.
 - Le moteur tient le journal des changements du contrat (numéro, date, élément, ce qui change
   pour le consommateur) dans un `CONTRACT_CHANGES.md` à sa racine.
-- Une release porte la version de l'interface ; `apex/RELEASES.md` dit quel moteur et quelle
-  interface elle contient (§4.3).
+- `apex/RELEASES.md` dit quel moteur et quelle interface chaque release contient (§4.3).
 
 ---
 

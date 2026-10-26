@@ -82,29 +82,23 @@ Les demandes R-001 à R-011 viennent de l'inventaire du 2026-10-25 (`apex-engine
 - Constat : le moteur n'écrit que le marqueur en clair `; apex_sliced = 1`.
 - État : ouverte.
 
-### R-011 — Python embarqué et dépendances du moteur
-- De : apex | À : utilisateur | Contrat : C2 | Ouverte : 2026-10-25
-- Besoin : l'application publiée doit pouvoir lancer le moteur sans installation.
-- Constat : l'interface embarque Python 3.12 « embeddable », bibliothèque standard seule
-  (`scripts/fetch-python-embed.cjs`), pour `gcode_to_polar.py`. Le moteur tourne sous
-  Python 3.14 avec trimesh, scipy, tetgen, rtree, manifold3d, networkx, shapely et son module
-  natif.
-- État : question à l'utilisateur — embarquer un Python complet avec le moteur, ou attendre un
-  exécutable natif du moteur.
-
 ### R-012 — Monter `apex` : copie des deux dépôts et première release
 - De : apex | À : apex | Contrat : — | Ouverte : 2026-10-25
-- Besoin : copier le moteur et l'interface dans `slicer-engine/` et `slicer-ux/`, créer
-  `apex/RELEASES.md`, et déplacer la construction des exécutables (`electron:build`) vers
-  `apex` (RULES §1, §4.3).
-- Fait (2026-10-25) : première copie par `integration/sync.sh`, `apex-engine@6e0081e` et
-  `apex-ui@b57fb2b` (`integration/sources.json`), 1 910 fichiers, 61 Mo. Exclus : sorties
-  (`out/`, GLB et GIF de la racine), artefacts de compilation (`build/`, `cpp/build/`,
-  `cpp/lib/`), journaux de session (`claude_context/`), et les dossiers que les deux dépôts
-  déclarent ignorés mais contiennent quand même (`research/`, `icons-main/`).
-- Reste : `RELEASES.md` ; construire les exécutables depuis `slicer-ux/` en y joignant le
-  moteur (dépend de R-011) ; lancer la suite de tests du moteur dans la copie.
-- État : en cours.
+- Fait :
+  - 2026-10-25 : première copie par `integration/sync.sh` (`apex-engine@6e0081e`,
+    `apex-ui@b57fb2b`, `integration/sources.json`). Exclus : sorties, artefacts de
+    compilation, journaux de session, `research/`, `icons-main/`.
+  - 2026-10-26 : fichiers de contexte des sessions (`CLAUDE.md`, `DT.md`, `LAST_SESSION.md`,
+    `AI_RULES.md`) exclus de la copie : ils restent dans leurs dépôts, où l'on développe ;
+    crédits réunis dans le README d'`apex` ; numéro de version commun (`VERSION`,
+    `VERSIONS.md`, RULES §9.1).
+- Décisions de l'utilisateur (2026-10-26) : copie sans historique, mise à jour à la main avant
+  chaque release puis automatisée ; dépôts rendus publics au fur et à mesure ; première
+  release Windows 64 bits seulement ; binaires natifs compilés sur une machine Windows de
+  GitHub Actions, jamais commités.
+- Reste : `RELEASES.md` ; la construction Windows sur GitHub Actions (moteur natif + noyau
+  d'édition + Electron) ; la barrière de qualité du §7.
+- État : en cours, release bloquée par R-014.
 
 ### R-013 — Plusieurs pièces sur le plateau, par défaut
 - De : utilisateur | À : apex-engine, puis apex-ui | Contrat : C1 | Ouverte : 2026-10-25
@@ -125,7 +119,36 @@ Les demandes R-001 à R-011 viennent de l'inventaire du 2026-10-25 (`apex-engine
   - Les fichiers à un seul objet donnent le même résultat dans les deux positions.
 - État : ouverte.
 
+### R-014 — Moteur 100 % C++ avant toute release
+- De : utilisateur | À : apex-engine | Contrat : C2 | Ouverte : 2026-10-26
+- Besoin (décision de l'utilisateur) : la release n'est faite que lorsque le moteur, voie de
+  la chaleur comprise, tourne entièrement en C++, sans Python.
+- Constat (`apex-engine@6e0081e`, chemin par défaut) : le moteur n'est PAS 100 % C++.
+  - Orchestration (`main.run_pipeline`) : Python.
+  - Étape 1 : chargement et réparation en Python (trimesh, shapely, networkx, pymeshfix) ;
+    TetGen par son module Python, en sous-processus ; natifs : test d'intersection,
+    segments, topologie des tétraèdres. TetGen doit rester dans un exécutable séparé
+    (limite #56 du moteur).
+  - Étapes 2 et 3 : natives, appelées depuis Python.
+  - Étape 4, chaleur : gradients et motif creux natifs ; **la méthode de la chaleur et la
+    résolution du système sont en Python et scipy** (aucun code natif ne la porte).
+  - Étape 5 : isosurfaces et bords natifs ; ordre et regroupements en Python.
+  - Étape 6 : Python et shapely par défaut ; le remplissage natif (Clipper2) est opt-in
+    (`APEX_NATIVE_FILL`), les ponts restent en Python.
+  - Étape 7 : native. Étape 8 : cinématique inverse native, le reste en numpy.
+  - Étape 9 : contrôle rapide natif. Étape 10 : Python (trimesh).
+  - Export G-code : corps natif ; en-tête, pied et préparation en Python.
+  - Dépendances Python à remplacer : trimesh, scipy, shapely, networkx, rtree, manifold3d,
+    pymeshfix, tetgen.
+- État : ouverte. Bloque R-012.
+
 ## Fermées
+
+### R-011 — Python embarqué et dépendances du moteur
+- De : apex | À : utilisateur | Contrat : C2 | Ouverte : 2026-10-25
+- Besoin : l'application publiée doit pouvoir lancer le moteur sans installation.
+- État : faite (2026-10-26, décision de l'utilisateur) — pas de Python embarqué ni
+  figé : le moteur livré sera entièrement en C++, et **aucune release avant** (R-014).
 
 ### R-001 — Sort de la copie du moteur dans `apex`
 - De : apex | À : utilisateur | Contrat : — | Ouverte : 2026-10-25

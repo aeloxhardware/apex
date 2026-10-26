@@ -16,3 +16,7 @@ l_triple_axis_trajectory.glb
 out_*.glb
 real_overhang_transition20.gif
 tetgen-tmpfile_skipped.*
+# Fichiers de contexte des sessions Claude : ils restent dans apex-engine, où l'on développe.
+CLAUDE.md
+DT.md
+LAST_SESSION.md

@@ -7,6 +7,9 @@ Ce dépôt combine le moteur (`aeloxhardware/apex-engine`) et l'interface
 **Ne jamais modifier `slicer-engine/` ni `slicer-ux/` ici** : ce sont des copies, refaites par
 `integration/sync.sh`. Les changements se font dans le dépôt d'origine.
 
+**Numéro de version** : `VERSION` (source de vérité) et `VERSIONS.md` (journal), mis à jour à
+chaque changement de version du moteur comme de l'interface (`integration/RULES.md`, §9).
+
 Toute session qui travaille sur l'un des trois dépôts lit d'abord :
 - [`integration/RULES.md`](integration/RULES.md) : règles de développement séparé, contrat,
   releases ;
