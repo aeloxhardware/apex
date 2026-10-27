@@ -81,6 +81,7 @@ Les demandes R-001 à R-011 viennent de l'inventaire du 2026-10-25 (`apex-engine
   l'étape 9 (moteur) peuvent donc ne pas porter sur la même tête.
 - Mesuré le 2026-10-27 (`trimesh`, `to_geometry()`, mm) : **les géométries diffèrent**, ce n'est pas
   un simple réencodage.
+- Noté par un Humain : résolu, à fermer après résolution des deux côtés. (`apex-ui/src/assets/models/aetheris-4.glb`) est le modèle commun. D'ailleurs, les modèles de tête d'outil devraient être liés aux profils d'imprimante.
 
   | | moteur | interface |
   |---|---|---|
