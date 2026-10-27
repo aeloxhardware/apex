@@ -40,35 +40,6 @@ Les demandes R-001 à R-011 viennent de l'inventaire du 2026-10-25 (`apex-engine
     rend pas la main avant d'avoir fini) : la barre avance par étape, sans estimation ; (2) la
     commande est `python main.py` tant que l'exécutable natif sans Python n'existe pas (R-014).
 
-### R-004 — Brancher le vrai tranchage dans l'interface
-- De : apex | À : apex-ui | Contrat : C2, C3 | Ouverte : 2026-10-25
-- Besoin : remplacer la simulation par l'appel du §5, une fois R-003 fait. **La barre de
-  progression suit les lignes de progression du moteur et ne doit plus du tout être une
-  minuterie** (décision de l'utilisateur, 2026-10-26 ; RULES §5.3) ; les étapes affichées
-  viennent de `<moteur> steps`.
-- Constat : `SlicingProgressModal.tsx` avance d'une étape toutes les 1 200 ms
-  (`STEP_DURATION_MS`) ; `slicingSteps.ts` liste des étapes de la voie Bird (« Déformation du
-  maillage tétraédrique »…), retirée du moteur le 2026-10-25.
-- État : ouverte, dépend de R-003.
-
-### R-005 — L'interface lit le schéma des paramètres
-- De : apex | À : apex-ui | Contrat : C1 | Ouverte : 2026-10-25
-- Besoin : script de copie du schéma depuis `apex-engine` (avec `--check`), types TypeScript
-  générés, `APEX_CONTRACT_VERSION` vérifié à la construction (RULES §4).
-- Constat : aucun fichier de `apex-ui` ne lit `params.schema.json`.
-- État : ouverte, dépend de R-002.
-
-### R-006 — Limites de la machine recopiées à la main
-- De : apex | À : apex-ui, apex-engine | Contrat : C1, C7 | Ouverte : 2026-10-25
-- Besoin : une seule source pour les limites de la machine actuelle.
-- Constat : `apex-ui/src/utils/machineLimits.ts` recopie `_default_machine_profile` du moteur
-  (B 0 à 185°, 1666,7 °/s, 1300 °/s², plateau de 150 mm) ;
-  `apex-ui/src/utils/layerLimits.ts` fixe 0,06 à 0,3 mm sans équivalent moteur ; les profils
-  d'imprimante de l'interface (`apex.rotary_axes`, `pivot_distance_mm`) ne sont pas reliés à
-  `MachineProfile`.
-- État : question à l'utilisateur — qui produit la description de la machine : le moteur
-  (`MachineProfile`, déjà dans le schéma) ou les profils d'imprimante de l'interface (C7) ?
-
 ### R-007 — Longueur pivot-pointe portée par le G-code
 - De : apex-ui | À : apex-engine | Contrat : C4, C5 | Ouverte : 2026-10-25
 - Besoin : le G-code dit avec quelle longueur pivot-pointe, quel `b_sign`, quel `tilt_sign` et
@@ -85,7 +56,8 @@ Les demandes R-001 à R-011 viennent de l'inventaire du 2026-10-25 (`apex-engine
   tirés de `machine_to_firmware` / `firmware_to_machine` ; l'interface les rejoue contre
   `nozzleTip` (`gcodeParse.ts`) et le noyau `native/` (RULES §6).
 - Constat : la même formule existe trois fois, sans test commun.
-- État : ouverte.
+- État : ouverte, en attente du moteur (aucun vecteur publié à `apex-engine@11a5e79`). L'interface
+  rejouera ses vecteurs contre `nozzleTip` et `native/` dès qu'ils existent.
 
 ### R-009 — Deux modèles de tête différents
 - De : apex | À : apex-engine, apex-ui | Contrat : C6 | Ouverte : 2026-10-25
@@ -94,7 +66,14 @@ Les demandes R-001 à R-011 viennent de l'inventaire du 2026-10-25 (`apex-engine
   contre `511c0807…` (`apex-ui/src/assets/models/aetheris-4.glb`). Non vérifié : si la
   géométrie diffère ou seulement l'encodage. Les collisions de l'édition (interface) et de
   l'étape 9 (moteur) peuvent donc ne pas porter sur la même tête.
-- État : ouverte — l'interface vérifie d'abord si sa copie a été retouchée exprès.
+- Vérifié par apex-ui le 2026-10-27 : les deux fichiers ne sont pas des copies l'un de l'autre. Moteur :
+  377 sommets, un seul maillage (nœud « Hotend v5 »), enveloppe en X de -16,1 à +18,9 mm, hauteur 77,3 mm.
+  Interface : 11 maillages détaillés (corps, ventilateur, radiateur, bloc de chauffe… et le repère « NOZZLE
+  origin » dont `scripts/gen-head-samples.cjs` a besoin), nœud « Hotend v4 », enveloppe en X de -17,5 à
+  +17,5 mm, hauteur 76,6 mm. La copie de l'interface n'a pas été retouchée depuis son ajout (`fbe30da`) ;
+  c'est donc bien une autre version de la tête (v4 contre v5), pas un encodage différent.
+- État : question à l'utilisateur — quelle tête fait référence (v4 ou v5), et le moteur a-t-il besoin du
+  modèle détaillé ou seulement de la géométrie de collision ? Aucune session ne le tranche seule.
 
 ### R-010 — Le moteur écrit le bloc d'en-tête chiffré
 - De : apex-ui | À : apex-engine | Contrat : C5 | Ouverte : 2026-10-25
@@ -143,7 +122,10 @@ Les demandes R-001 à R-011 viennent de l'inventaire du 2026-10-25 (`apex-engine
     posée à côté d'une grande pourrait disparaître sans erreur. À vérifier sur un plateau à
     deux pièces de tailles très différentes.
   - Les fichiers à un seul objet donnent le même résultat dans les deux positions.
-- État : ouverte.
+- État : partie interface faite (apex-ui@aa3e3de) : `allow_multi_mesh` et `heat_method_time_factor` (3000, décision
+  du 2026-10-27) sont des « Réglages avancés de l'algorithme (développeur) » dans Paramètres (visibles en
+  mode dev), envoyés explicitement dans chaque requête (pas dans « Paramètres de tranchage »). **Reste côté
+  moteur** : passer le défaut de `allow_multi_mesh` à vrai, et vérifier les deux points du constat.
 
 ### R-014 — Moteur 100 % C++ avant toute release
 - De : utilisateur | À : apex-engine | Contrat : C2 | Ouverte : 2026-10-26
@@ -197,7 +179,12 @@ Les demandes R-001 à R-011 viennent de l'inventaire du 2026-10-25 (`apex-engine
   `tetranet/tools/diagnosis_message.py`. Les auto-intersections viennent de l'étape 1 du moteur.
 - À faire : moteur — champ de résultat (type de défaut + nombres) et refus avec ce statut ;
   interface — afficher le texte, le même dans les deux langues prévues, accords compris.
-- État : ouverte.
+- État : en cours. Moteur : refus fait (`SurfaceInconsistentError`, statut `surface_inconsistent`, code 3,
+  `message` accordé et `diagnostic`) — mais il ne se déclenche qu'avec `mesher="tetranet"` (le défaut est
+  TetGen). Interface (apex-ui@aa3e3de) : le message du moteur est affiché tel quel dans la fenêtre de tranchage.
+  **Reste** : (1) l'interface n'a pas de langues (tout est en français) ; la reconstruction traduisible du
+  texte à partir des nombres demande que le diagnostic porte aussi `self_intersections` et `volume_pct` ;
+  (2) décider si TetraNet devient le mailleur par défaut, faute de quoi ce refus n'arrive jamais.
 
 ### R-017 — Progression réelle à l'intérieur de chaque étape
 - De : apex-ui | À : apex-engine | Contrat : C3 | Ouverte : 2026-10-27
@@ -221,6 +208,48 @@ Les demandes R-001 à R-011 viennent de l'inventaire du 2026-10-25 (`apex-engine
 - État : ouverte.
 
 ## Fermées
+
+### R-004 — Brancher le vrai tranchage dans l'interface
+- De : apex | À : apex-ui | Contrat : C2, C3 | Ouverte : 2026-10-25
+- Besoin : remplacer la simulation par l'appel du §5, une fois R-003 fait. **La barre de
+  progression suit les lignes de progression du moteur et ne doit plus du tout être une
+  minuterie** (décision de l'utilisateur, 2026-10-26 ; RULES §5.3) ; les étapes affichées
+  viennent de `<moteur> steps`.
+- Constat : `SlicingProgressModal.tsx` avance d'une étape toutes les 1 200 ms
+  (`STEP_DURATION_MS`) ; `slicingSteps.ts` liste des étapes de la voie Bird (« Déformation du
+  maillage tétraédrique »…), retirée du moteur le 2026-10-25.
+- État : faite (apex-ui@aa3e3de, 2026-10-27). `electron/engine-runner.cjs` lance `main.py slice --request` en
+  sous-processus (stdin fermé, noyau C++ exigé : `APEX_USE_CPP=1`, refus si `apex_core` indisponible) ;
+  les étapes viennent de `main.py steps` ; la fenêtre affiche 11 barres (une par étape) qui ne suivent que
+  les lignes de progression du moteur (aucune minuterie) ; annulation (arrêt de l'arbre de processus) ;
+  refus typés affichés. Vérifié de bout en bout : death, 11 étapes réelles, G-code ouvert dans l'aperçu.
+  Le plateau entier est tranché (tous les modèles, pas la sélection).
+
+### R-005 — L'interface lit le schéma des paramètres
+- De : apex | À : apex-ui | Contrat : C1 | Ouverte : 2026-10-25
+- Besoin : script de copie du schéma depuis `apex-engine` (avec `--check`), types TypeScript
+  générés, `APEX_CONTRACT_VERSION` vérifié à la construction (RULES §4).
+- Constat : aucun fichier de `apex-ui` ne lit `params.schema.json`.
+- État : faite (apex-ui@aa3e3de, 2026-10-27). `scripts/sync-engine-schema.cjs` copie `config/params.schema.json`
+  dans `src/generated/` et génère `params.schema.ts` (types, tous champs facultatifs) ; `--check` compare au
+  moteur ; `--verify` (lancé par `build` et `electron:build*`) vérifie sans le moteur que les types sont à
+  jour et que `x-apex-contract` du schéma copié égale `APEX_CONTRACT_VERSION` (contrat 2). La requête de
+  tranchage est typée par ces types.
+
+### R-006 — Limites de la machine recopiées à la main
+- De : apex | À : apex-ui, apex-engine | Contrat : C1, C7 | Ouverte : 2026-10-25
+- Besoin : une seule source pour les limites de la machine actuelle.
+- Constat : `apex-ui/src/utils/machineLimits.ts` recopie `_default_machine_profile` du moteur
+  (B 0 à 185°, 1666,7 °/s, 1300 °/s², plateau de 150 mm) ;
+  `apex-ui/src/utils/layerLimits.ts` fixe 0,06 à 0,3 mm sans équivalent moteur ; les profils
+  d'imprimante de l'interface (`apex.rotary_axes`, `pivot_distance_mm`) ne sont pas reliés à
+  `MachineProfile`.
+- État : faite (apex-ui@aa3e3de, 2026-10-27). Décision de l'utilisateur : ce sont les **profils d'imprimante** qui
+  décrivent la machine. `profiles/Aelox Hardware/Aetheris-4.json` porte désormais le rayon du plateau, les
+  limites de hauteur de couche et la plage de C ; `src/utils/machineProfile.ts` en tire les limites de
+  l'interface (`machineLimits.ts`, `layerLimits.ts` n'ont plus de valeurs recopiées) et le `machine_profile`
+  envoyé au moteur dans chaque requête (axes C puis B, vitesses et accélérations, rayon du plateau).
+  Les valeurs encore « Inconnu » dans le profil (autres plages de C) restent à fournir par l'utilisateur.
 
 ### R-011 — Python embarqué et dépendances du moteur
 - De : apex | À : utilisateur | Contrat : C2 | Ouverte : 2026-10-25
