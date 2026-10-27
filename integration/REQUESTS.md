@@ -74,37 +74,28 @@ Les demandes R-001 à R-011 viennent de l'inventaire du 2026-10-25 (`apex-engine
 
 ### R-009 — Deux modèles de tête différents
 - De : apex | À : apex-engine, apex-ui | Contrat : C6 | Ouverte : 2026-10-25
-- Besoin : un seul `aetheris-4.glb`, copié par script dans l'interface.
-- Constat : SHA-256 `8f9a854d…` (`apex-engine/res/3d/toolheads/aetheris-4/aetheris-4.glb`)
-  contre `511c0807…` (`apex-ui/src/assets/models/aetheris-4.glb`). Non vérifié : si la
-  géométrie diffère ou seulement l'encodage. Les collisions de l'édition (interface) et de
-  l'étape 9 (moteur) peuvent donc ne pas porter sur la même tête.
-- Mesuré le 2026-10-27 (`trimesh`, `to_geometry()`, mm) : **les géométries diffèrent**, ce n'est pas
-  un simple réencodage.
-- Noté par un Humain : résolu, à fermer après résolution des deux côtés. (`apex-ui/src/assets/models/aetheris-4.glb`) est le modèle commun. D'ailleurs, les modèles de tête d'outil devraient être liés aux profils d'imprimante.
-
-  | | moteur | interface |
-  |---|---|---|
-  | sommets / faces | 377 / 372 | 16 237 / 21 538 |
-  | boîte (mm) | x −29,1…46,9 ; y 0,1…77,25 ; z −18,9…16,1 | x −29,1…46,9 ; y 0…76,55 ; z −17,5…17,5 |
-  | aire (mm²) | 15 729 | 31 502 |
-
-  Même étendue en X et même hauteur en Z (35 mm), mais la boîte du moteur est décalée de ~1,4 mm
-  en Z, et son extrémité en Y est 0,7 mm plus haute. La copie de l'interface compte 43 fois plus
-  de sommets : elle semble une version plus détaillée, recentrée en Z. L'étape 9 teste des points de
-  la surface : un autre échantillonnage et un décalage de 1,4 mm donnent des distances différentes.
-  Non vérifié : si le décalage est une retouche voulue ou un changement d'origine.
-- Question à l'utilisateur : quelle est la bonne tête (origine = pointe de buse, convention du moteur) ?
-  Sans réponse, le moteur ne peut pas la remplacer : l'étape 9 est mesurée avec la sienne.
-- État : question à l'utilisateur. Dès qu'une des deux est désignée, copie par script (C6, `--check`).
-- Vérifié par apex-ui le 2026-10-27 : les deux fichiers ne sont pas des copies l'un de l'autre. Moteur :
-  377 sommets, un seul maillage (nœud « Hotend v5 »), enveloppe en X de -16,1 à +18,9 mm, hauteur 77,3 mm.
-  Interface : 11 maillages détaillés (corps, ventilateur, radiateur, bloc de chauffe… et le repère « NOZZLE
-  origin » dont `scripts/gen-head-samples.cjs` a besoin), nœud « Hotend v4 », enveloppe en X de -17,5 à
-  +17,5 mm, hauteur 76,6 mm. La copie de l'interface n'a pas été retouchée depuis son ajout (`fbe30da`) ;
-  c'est donc bien une autre version de la tête (v4 contre v5), pas un encodage différent.
-- État : question à l'utilisateur — quelle tête fait référence (v4 ou v5), et le moteur a-t-il besoin du
-  modèle détaillé ou seulement de la géométrie de collision ? Aucune session ne le tranche seule.
+- Besoin : un seul `aetheris-4.glb`, copié par script.
+- Constat (2026-10-27) : SHA-256 `8f9a854d…` (moteur) contre `511c0807…` (interface). Les géométries
+  diffèrent (`trimesh`, `to_geometry()`, mm) : moteur 377 sommets / 372 faces, un seul maillage, nœud
+  « Hotend v5 », aire 15 729 mm² ; interface 16 237 sommets / 21 538 faces, 11 maillages (corps,
+  ventilateur, radiateur, bloc de chauffe, repère « NOZZLE origin »), nœud « Hotend v4 », aire
+  31 502 mm². Ce sont deux versions de la tête (v5 contre v4), pas un encodage différent.
+- **Décision d'un Humain (2026-10-27) : le modèle commun est celui de l'interface**
+  (`apex-ui/src/assets/models/aetheris-4.glb`). Les modèles de tête devraient en outre être liés aux
+  profils d'imprimante (voir R-020).
+- Reste à faire côté moteur (relecture du 2026-10-27, rien n'est encore fait) :
+  1. remplacer `res/3d/toolheads/aetheris-4/aetheris-4.glb` par le fichier de l'interface, **copié par
+     un script avec `--check`** (§4.2), jamais à la main ;
+  2. vérifier que l'origine de la scène est bien la pointe de buse (convention de `load_toolhead_mesh`) :
+     le fichier de l'interface porte un repère « NOZZLE origin » ; les boîtes diffèrent de ~1,4 mm
+     en Z, et c'est exactement ce qui fausserait l'étape 9 si l'origine n'était pas la même ;
+  3. **remesurer l'étape 9** (et 5b, 10) sur les quatre modèles : la tête passe de 377 à 16 237 sommets
+     et sa surface est plus fine, donc le coût d'échantillonnage (`toolhead_sample_spacing`) et les
+     collisions mesurées (limites #64, #67) peuvent changer. Une variation est attendue, pas un
+     défaut : à consigner avant d'avancer l'épingle (RULES §7, contrôle 6) ;
+  4. la tête v5 du moteur disparaît (elle reste dans l'historique git).
+- Reste à faire côté interface : rien d'obligatoire, sinon fournir le fichier au script du moteur.
+- État : **décidée** ; à fermer quand le moteur a adopté le fichier et remesuré l'étape 9.
 
 ### R-010 — Le moteur écrit le bloc d'en-tête chiffré
 - De : apex-ui | À : apex-engine | Contrat : C5 | Ouverte : 2026-10-25
@@ -284,6 +275,16 @@ Les demandes R-001 à R-011 viennent de l'inventaire du 2026-10-25 (`apex-engine
   commit préfixé du numéro complet. **Question à l'utilisateur** : confirmer que le retrait FEM/Bird
   est bien un niveau majeur et non moyen.
 - État : question à l'utilisateur.
+
+### R-020 — Lier le modèle de tête aux profils d'imprimante
+- De : utilisateur (note sur R-009) | À : apex-ui, apex-engine | Contrat : C6, C7 | Ouverte : 2026-10-27
+- Besoin : un profil d'imprimante (C7, `apex-ui/profiles/`) désigne son modèle de tête ; le moteur
+  charge la tête que le profil désigne, au lieu d'un chemin fixe (`main._default_machine_profile` charge
+  `aetheris-4.glb` en dur).
+- Constat : aujourd'hui, `MachineProfile.nozzle_model` est peuplé par l'appelant (`load_toolhead_mesh`) ;
+  les profils d'interface ne le référencent pas. Cela rejoint R-006 (qui produit la description de la
+  machine ?) : à trancher ensemble.
+- État : question à l'utilisateur, avec R-006 (le producteur du profil décide où vit le lien).
 
 ## Fermées
 
