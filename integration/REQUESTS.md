@@ -115,10 +115,11 @@ Les demandes R-001 à R-011 viennent de l'inventaire du 2026-10-25 (`apex-engine
   | boîte (mm) | x −29,1…46,9 ; y 0,1…77,25 ; z −18,9…16,1 | x −29,1…46,9 ; y 0…76,55 ; z −17,5…17,5 |
   | aire (mm²) | 15 729 | 31 502 |
 
-  Même étendue en X ; en Z le moteur est décalé de ~1,4 mm (−18,9…16,1 contre −17,5…17,5) et en Y de
-  0,7 mm. La copie de l'interface semble une version recentrée et plus détaillée. L'étape 9 teste des
-  points de la surface : un modèle à 4× moins de sommets et un décalage de 1,4 mm donnent des
-  distances différentes.
+  Même étendue en X et même hauteur en Z (35 mm), mais la boîte du moteur est décalée de ~1,4 mm
+  en Z, et son extrémité en Y est 0,7 mm plus haute. La copie de l'interface compte 43 fois plus
+  de sommets : elle semble une version plus détaillée, recentrée en Z. L'étape 9 teste des points de
+  la surface : un autre échantillonnage et un décalage de 1,4 mm donnent des distances différentes.
+  Non vérifié : si le décalage est une retouche voulue ou un changement d'origine.
 - Question à l'utilisateur : quelle est la bonne tête (origine = pointe de buse, convention du moteur) ?
   Sans réponse, le moteur ne peut pas la remplacer : l'étape 9 est mesurée avec la sienne.
 - État : question à l'utilisateur. Dès qu'une des deux est désignée, copie par script (C6, `--check`).
@@ -273,7 +274,7 @@ Les demandes R-001 à R-011 viennent de l'inventaire du 2026-10-25 (`apex-engine
   accepter un rappel appelé par lots (le GIL est libéré dans les points d'entrée).
 - État : ouverte.
 
-### R-018 — Reprise des en-têtes de contrat dans les demandes faites
+### R-018 — R-002 et R-003 : faites côté moteur, à fermer côté interface
 - De : apex | À : apex | Contrat : — | Ouverte : 2026-10-27
 - Besoin : `REQUESTS.md` garde R-002 et R-003 « ouvertes » alors que le moteur les a faites ;
   elles ne se ferment qu'avec le commit de l'interface (RULES §8). Les lister ici pour ne pas les
@@ -282,13 +283,13 @@ Les demandes R-001 à R-011 viennent de l'inventaire du 2026-10-25 (`apex-engine
   lirait le schéma en version 1 serait refusée par la requête (code 2).
 - État : ouverte, suivi seulement ; se ferme avec R-004 et R-005.
 
-### R-019 — Version de l'application à l'ordre du jour : `VERSIONS.md` en retard sur le moteur
+### R-019 — `VERSIONS.md` ne mentionne pas le changement de méthode du moteur
 - De : apex-engine | À : apex | Contrat : — | Ouverte : 2026-10-27
 - Besoin : `VERSION` vaut `alpha-0.2.1.4.3.11.1.221` (2026-10-21, interface) ; le moteur a changé de
   méthode de tranchage (voie unique de la chaleur, contrat 2, majeur) sans que la ligne existe dans
   `VERSIONS.md` (RULES §9.1).
 - À faire (session moteur, à la prochaine montée de version) : un niveau **majeur** (« nouvelle
-  méthode de tranchage ») : `alpha-0.2.2.0.0.0.0.<builds>` ; `git pull` d'`apex` d'abord, message de
+  méthode de tranchage ») : `alpha-0.2.2.0.0.0.0.221` (majeur +1, niveaux à droite remis à zéro, Builds inchangé) ; `git pull` d'`apex` d'abord, message de
   commit préfixé du numéro complet. **Question à l'utilisateur** : confirmer que le retrait FEM/Bird
   est bien un niveau majeur et non moyen.
 - État : question à l'utilisateur.
