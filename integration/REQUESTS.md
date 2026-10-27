@@ -8,38 +8,6 @@ Les demandes R-001 à R-011 viennent de l'inventaire du 2026-10-25 (`apex-engine
 
 ## Ouvertes
 
-### R-002 — Numéro de contrat dans le schéma
-- De : apex | À : apex-engine | Contrat : C1 | Ouverte : 2026-10-25
-- Besoin : `scripts/gen_params.py` écrit `x-apex-contract` (entier) dans
-  `config/params.schema.json` ; le moteur crée `CONTRACT_CHANGES.md` (RULES §4.1, §9).
-- État : **faite côté moteur le 2026-10-26** (`apex-engine`) : `APEX_CONTRACT_VERSION = 1` dans
-  `config/schema.py`, clé `x-apex-contract` écrite par `scripts/gen_params.py`, `CONTRACT_CHANGES.md`
-  créé. Reste : `apex` copie le schéma (sync) et l'interface lit le numéro (R-005).
-
-### R-003 — Interface en ligne de commande du tranchage
-- De : apex-ui | À : apex-engine | Contrat : C2, C3 | Ouverte : 2026-10-25
-- Besoin : `<moteur> slice --request <requete.json>` et `<moteur> steps` (RULES §5).
-- Constat : `main.py` ne prend que des options de ligne de commande isolées (`--resolution`,
-  `--layer-height`, `--output-gcode`…), sans requête JSON, sans progression ni résultat
-  structurés.
-- État : **faite côté moteur le 2026-10-26**, à valider par l'interface (R-004). `python main.py steps` et
-  `python main.py slice --request <requete.json>` (`apex-engine/slice_cli.py`, tests
-  `tests/test_slice_cli.py`) :
-  - requête : `contract`, `mesh`, `output_dir`, `output_name` (facultatif), `params` (`PipelineParams`
-    partiel), `gcode_params` (`GcodeParams` partiel) ; un champ inconnu à n'importe quel niveau, ou un
-    numéro de contrat différent, donne le code 2 ;
-  - sortie d'erreur : lignes JSON `{"type":"step","slug","fraction"}` (0 au début, 1 à la fin de
-    chacune des 11 étapes, `export` comprise) et `{"type":"log","level","code","message"}` ; le journal
-    libre du pipeline y est aussi envoyé ;
-  - sortie standard : une seule ligne, l'objet résultat (`status` : `ok`, `invalid_request`,
-    `model_refused`, `surface_inconsistent`, `export_refused`, `error` ; `gcode`, `report`,
-    `placement_offset_z`, comptes, `warnings`) ;
-  - codes : 0 réussi, 2 requête invalide, 3 modèle refusé (dont R-016 et le refus de l'export strict),
-    1 plantage ; G-code écrit en `.part` puis renommé.
-  - **Limites connues** : (1) pas de fraction intermédiaire à l'intérieur d'une étape (le moteur ne
-    rend pas la main avant d'avoir fini) : la barre avance par étape, sans estimation ; (2) la
-    commande est `python main.py` tant que l'exécutable natif sans Python n'existe pas (R-014).
-
 ### R-007 — Longueur pivot-pointe portée par le G-code
 - De : apex-ui | À : apex-engine | Contrat : C4, C5 | Ouverte : 2026-10-25
 - Besoin : le G-code dit avec quelle longueur pivot-pointe, quel `b_sign`, quel `tilt_sign` et
@@ -68,9 +36,8 @@ Les demandes R-001 à R-011 viennent de l'inventaire du 2026-10-25 (`apex-engine
   n'a donc rien à rejouer. Besoin précisé : un fichier `tests/vectors/kinematics_vectors.json`
   (pivot, `b_sign`, `tilt_sign`, `z_reference`, entrées, sorties, tolérance) généré par un script du
   moteur avec `--check`, copié dans `apex` par `sync.sh`.
-- État : ouverte. Dépend de R-007 pour les paramètres à inclure.
-- État : ouverte, en attente du moteur (aucun vecteur publié à `apex-engine@11a5e79`). L'interface
-  rejouera ses vecteurs contre `nozzleTip` et `native/` dès qu'ils existent.
+- État : ouverte. Dépend de R-007 pour les paramètres à inclure. Côté interface : rejouera le fichier de
+  vecteurs contre `nozzleTip` (`gcodeParse.ts`) et `native/` dès que le moteur le publie.
 
 ### R-009 — Deux modèles de tête différents
 - De : apex | À : apex-engine, apex-ui | Contrat : C6 | Ouverte : 2026-10-25
@@ -95,15 +62,16 @@ Les demandes R-001 à R-011 viennent de l'inventaire du 2026-10-25 (`apex-engine
   distances différentes.
 - Question à l'utilisateur : quelle est la bonne tête (origine = pointe de buse, convention du moteur) ?
   Sans réponse, le moteur ne peut pas la remplacer : l'étape 9 est mesurée avec la sienne.
-- État : question à l'utilisateur. Dès qu'une des deux est désignée, copie par script (C6, `--check`).
-- Vérifié par apex-ui le 2026-10-27 : les deux fichiers ne sont pas des copies l'un de l'autre. Moteur :
-  377 sommets, un seul maillage (nœud « Hotend v5 »), enveloppe en X de -16,1 à +18,9 mm, hauteur 77,3 mm.
-  Interface : 11 maillages détaillés (corps, ventilateur, radiateur, bloc de chauffe… et le repère « NOZZLE
-  origin » dont `scripts/gen-head-samples.cjs` a besoin), nœud « Hotend v4 », enveloppe en X de -17,5 à
-  +17,5 mm, hauteur 76,6 mm. La copie de l'interface n'a pas été retouchée depuis son ajout (`fbe30da`) ;
-  c'est donc bien une autre version de la tête (v4 contre v5), pas un encodage différent.
-- État : question à l'utilisateur — quelle tête fait référence (v4 ou v5), et le moteur a-t-il besoin du
-  modèle détaillé ou seulement de la géométrie de collision ? Aucune session ne le tranche seule.
+- Vérifié par apex-ui le 2026-10-27 : moteur = « Hotend v5 » (un maillage), interface = « Hotend v4 »
+  (11 maillages dont le repère « NOZZLE origin » nécessaire à `scripts/gen-head-samples.cjs`) ; la copie de
+  l'interface n'a pas été retouchée depuis `fbe30da`.
+- Décision de l'utilisateur (2026-10-27) : le modèle de l'interface (`apex-ui/src/assets/models/aetheris-4.glb`)
+  est le modèle commun ; les modèles de tête doivent être liés aux profils d'imprimante.
+- État : **interface faite** (apex-ui@ecb9b17) : le profil désigne son modèle (`apex.toolhead_model`, documenté dans
+  `PRINTER_PROFILE_FORMAT.md`) et l'aperçu le charge par ce lien (`src/utils/toolheadModels.ts`). **Reste côté
+  moteur** : remplacer `res/3d/toolheads/aetheris-4/aetheris-4.glb` par une copie par script (C6, `--check`) du
+  fichier de l'interface, relire l'étape 9 avec cette tête (origine = pointe de buse), lier la tête au
+  `MachineProfile`. Se ferme des deux côtés.
 
 ### R-010 — Le moteur écrit le bloc d'en-tête chiffré
 - De : apex-ui | À : apex-engine | Contrat : C5 | Ouverte : 2026-10-25
@@ -165,11 +133,11 @@ Les demandes R-001 à R-011 viennent de l'inventaire du 2026-10-25 (`apex-engine
   Non vérifié : la perte d'une petite pièce par `_extract_dominant_shell` (modèle à deux pièces à
   construire).
 - Reste côté interface : placer le réglage dans « Réglages avancés… » (C1, schéma).
-- État : ouverte (moteur : défaut + `to_geometry()` + deux tests ; interface ensuite).
-- État : partie interface faite (apex-ui@aa3e3de) : `allow_multi_mesh` et `heat_method_time_factor` (3000, décision
-  du 2026-10-27) sont des « Réglages avancés de l'algorithme (développeur) » dans Paramètres (visibles en
-  mode dev), envoyés explicitement dans chaque requête (pas dans « Paramètres de tranchage »). **Reste côté
-  moteur** : passer le défaut de `allow_multi_mesh` à vrai, et vérifier les deux points du constat.
+- État : partie interface faite (apex-ui@aa3e3de) : `allow_multi_mesh` et `heat_method_time_factor` (3000,
+  décision du 2026-10-27) sont des « Réglages avancés de l'algorithme (développeur) » dans Paramètres (visibles
+  en mode dev), envoyés explicitement dans chaque requête (pas dans « Paramètres de tranchage »). **Reste côté
+  moteur** : défaut à vrai, `loaded.to_geometry()` à la place de la concaténation (perte des transformations
+  confirmée), deux tests, et le cas d'une petite pièce jetée par `_extract_dominant_shell` (non vérifié).
 
 ### R-014 — Moteur 100 % C++ avant toute release
 - De : utilisateur | À : apex-engine | Contrat : C2 | Ouverte : 2026-10-26
@@ -264,15 +232,6 @@ Les demandes R-001 à R-011 viennent de l'inventaire du 2026-10-25 (`apex-engine
   accepter un rappel appelé par lots (le GIL est libéré dans les points d'entrée).
 - État : ouverte.
 
-### R-018 — Reprise des en-têtes de contrat dans les demandes faites
-- De : apex | À : apex | Contrat : — | Ouverte : 2026-10-27
-- Besoin : `REQUESTS.md` garde R-002 et R-003 « ouvertes » alors que le moteur les a faites ;
-  elles ne se ferment qu'avec le commit de l'interface (RULES §8). Les lister ici pour ne pas les
-  perdre : R-002 attend R-005 (interface), R-003 attend R-004 (interface).
-- Constat : contrat à la version 2 depuis le 2026-10-27 (`CONTRACT_CHANGES.md`) : l'interface qui
-  lirait le schéma en version 1 serait refusée par la requête (code 2).
-- État : ouverte, suivi seulement ; se ferme avec R-004 et R-005.
-
 ### R-019 — Version de l'application à l'ordre du jour : `VERSIONS.md` en retard sur le moteur
 - De : apex-engine | À : apex | Contrat : — | Ouverte : 2026-10-27
 - Besoin : `VERSION` vaut `alpha-0.2.1.4.3.11.1.221` (2026-10-21, interface) ; le moteur a changé de
@@ -285,6 +244,47 @@ Les demandes R-001 à R-011 viennent de l'inventaire du 2026-10-25 (`apex-engine
 - État : question à l'utilisateur.
 
 ## Fermées
+
+### R-002 — Numéro de contrat dans le schéma
+- De : apex | À : apex-engine | Contrat : C1 | Ouverte : 2026-10-25
+- Besoin : `scripts/gen_params.py` écrit `x-apex-contract` (entier) dans
+  `config/params.schema.json` ; le moteur crée `CONTRACT_CHANGES.md` (RULES §4.1, §9).
+- État : **faite** (moteur 2026-10-26) (`apex-engine`) : `APEX_CONTRACT_VERSION = 1` dans
+  `config/schema.py`, clé `x-apex-contract` écrite par `scripts/gen_params.py`, `CONTRACT_CHANGES.md`
+  créé. Faite aussi côté interface (apex-ui@aa3e3de, 2026-10-27, R-005) : copie du schéma et vérification du numéro à la construction.
+
+### R-003 — Interface en ligne de commande du tranchage
+- De : apex-ui | À : apex-engine | Contrat : C2, C3 | Ouverte : 2026-10-25
+- Besoin : `<moteur> slice --request <requete.json>` et `<moteur> steps` (RULES §5).
+- Constat : `main.py` ne prend que des options de ligne de commande isolées (`--resolution`,
+  `--layer-height`, `--output-gcode`…), sans requête JSON, sans progression ni résultat
+  structurés.
+- État : **faite** (moteur 2026-10-26 ; validée par l'interface apex-ui@aa3e3de, 2026-10-27, R-004 : `slice --request` et `steps` utilisés en sous-processus, 11 étapes, résultat, codes de sortie, annulation). `python main.py steps` et
+  `python main.py slice --request <requete.json>` (`apex-engine/slice_cli.py`, tests
+  `tests/test_slice_cli.py`) :
+  - requête : `contract`, `mesh`, `output_dir`, `output_name` (facultatif), `params` (`PipelineParams`
+    partiel), `gcode_params` (`GcodeParams` partiel) ; un champ inconnu à n'importe quel niveau, ou un
+    numéro de contrat différent, donne le code 2 ;
+  - sortie d'erreur : lignes JSON `{"type":"step","slug","fraction"}` (0 au début, 1 à la fin de
+    chacune des 11 étapes, `export` comprise) et `{"type":"log","level","code","message"}` ; le journal
+    libre du pipeline y est aussi envoyé ;
+  - sortie standard : une seule ligne, l'objet résultat (`status` : `ok`, `invalid_request`,
+    `model_refused`, `surface_inconsistent`, `export_refused`, `error` ; `gcode`, `report`,
+    `placement_offset_z`, comptes, `warnings`) ;
+  - codes : 0 réussi, 2 requête invalide, 3 modèle refusé (dont R-016 et le refus de l'export strict),
+    1 plantage ; G-code écrit en `.part` puis renommé.
+  - **Limites connues** : (1) pas de fraction intermédiaire à l'intérieur d'une étape (le moteur ne
+    rend pas la main avant d'avoir fini) : la barre avance par étape, sans estimation ; (2) la
+    commande est `python main.py` tant que l'exécutable natif sans Python n'existe pas (R-014).
+
+### R-018 — Reprise des en-têtes de contrat dans les demandes faites
+- De : apex | À : apex | Contrat : — | Ouverte : 2026-10-27
+- Besoin : `REQUESTS.md` garde R-002 et R-003 « ouvertes » alors que le moteur les a faites ;
+  elles ne se ferment qu'avec le commit de l'interface (RULES §8). Les lister ici pour ne pas les
+  perdre : R-002 attend R-005 (interface), R-003 attend R-004 (interface).
+- Constat : contrat à la version 2 depuis le 2026-10-27 (`CONTRACT_CHANGES.md`) : l'interface qui
+  lirait le schéma en version 1 serait refusée par la requête (code 2).
+- État : faite (2026-10-27) : R-004 et R-005 sont faites côté interface (apex-ui@aa3e3de), donc R-002 et R-003 sont fermées.
 
 ### R-004 — Brancher le vrai tranchage dans l'interface
 - De : apex | À : apex-ui | Contrat : C2, C3 | Ouverte : 2026-10-25
