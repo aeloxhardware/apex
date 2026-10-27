@@ -48,6 +48,13 @@ Les demandes R-001 à R-011 viennent de l'inventaire du 2026-10-25 (`apex-engine
 - Constat : l'interface suppose `NOZZLE_PIVOT_MM = 46` (`gcodeParse.ts`) ; le moteur rend cette
   longueur réglable (`config/pivot_to_tip.json`, `GcodeParams.pivot_to_tip`). Un G-code exporté
   avec une autre longueur serait mal relu, sans erreur.
+- Constat du 2026-10-27 (`apex-engine@11a5e798`) : inchangé. `GcodeParams` porte bien `pivot_to_tip`,
+  `tilt_sign`, `b_sign`, `z_reference`, mais l'en-tête écrit (`gcode_export.py`) ne contient que
+  `; apex_sliced = 1` ; `GcodeReport.pivot_to_tip` n'est que dans le résultat JSON, pas dans le fichier.
+- Proposition (le moteur choisit) : lignes d'en-tête `; apex_kinematics pivot_to_tip=… b_sign=…
+  tilt_sign=… z_reference=…`, ou ces quatre valeurs dans le bloc `meta` de R-010. Les deux demandes
+  se traitent ensemble. Côté interface, ne plus lire `NOZZLE_PIVOT_MM` en dur : lire l'en-tête,
+  refuser un fichier qui n'en a pas (sauf marqueur d'ancienne version).
 - État : ouverte.
 
 ### R-008 — Vecteurs de test de la cinématique
@@ -56,6 +63,12 @@ Les demandes R-001 à R-011 viennent de l'inventaire du 2026-10-25 (`apex-engine
   tirés de `machine_to_firmware` / `firmware_to_machine` ; l'interface les rejoue contre
   `nozzleTip` (`gcodeParse.ts`) et le noyau `native/` (RULES §6).
 - Constat : la même formule existe trois fois, sans test commun.
+- Constat du 2026-10-27 : `tests/test_gcode_export.py` teste déjà `machine_to_firmware` /
+  `firmware_to_machine` (aller-retour), mais aucun fichier de vecteurs JSON n'est publié ; l'interface
+  n'a donc rien à rejouer. Besoin précisé : un fichier `tests/vectors/kinematics_vectors.json`
+  (pivot, `b_sign`, `tilt_sign`, `z_reference`, entrées, sorties, tolérance) généré par un script du
+  moteur avec `--check`, copié dans `apex` par `sync.sh`.
+- État : ouverte. Dépend de R-007 pour les paramètres à inclure.
 - État : ouverte, en attente du moteur (aucun vecteur publié à `apex-engine@11a5e79`). L'interface
   rejouera ses vecteurs contre `nozzleTip` et `native/` dès qu'ils existent.
 
@@ -66,6 +79,22 @@ Les demandes R-001 à R-011 viennent de l'inventaire du 2026-10-25 (`apex-engine
   contre `511c0807…` (`apex-ui/src/assets/models/aetheris-4.glb`). Non vérifié : si la
   géométrie diffère ou seulement l'encodage. Les collisions de l'édition (interface) et de
   l'étape 9 (moteur) peuvent donc ne pas porter sur la même tête.
+- Mesuré le 2026-10-27 (`trimesh`, `to_geometry()`, mm) : **les géométries diffèrent**, ce n'est pas
+  un simple réencodage.
+
+  | | moteur | interface |
+  |---|---|---|
+  | sommets / faces | 377 / 372 | 16 237 / 21 538 |
+  | boîte (mm) | x −29,1…46,9 ; y 0,1…77,25 ; z −18,9…16,1 | x −29,1…46,9 ; y 0…76,55 ; z −17,5…17,5 |
+  | aire (mm²) | 15 729 | 31 502 |
+
+  Même étendue en X ; en Z le moteur est décalé de ~1,4 mm (−18,9…16,1 contre −17,5…17,5) et en Y de
+  0,7 mm. La copie de l'interface semble une version recentrée et plus détaillée. L'étape 9 teste des
+  points de la surface : un modèle à 4× moins de sommets et un décalage de 1,4 mm donnent des
+  distances différentes.
+- Question à l'utilisateur : quelle est la bonne tête (origine = pointe de buse, convention du moteur) ?
+  Sans réponse, le moteur ne peut pas la remplacer : l'étape 9 est mesurée avec la sienne.
+- État : question à l'utilisateur. Dès qu'une des deux est désignée, copie par script (C6, `--check`).
 - Vérifié par apex-ui le 2026-10-27 : les deux fichiers ne sont pas des copies l'un de l'autre. Moteur :
   377 sommets, un seul maillage (nœud « Hotend v5 »), enveloppe en X de -16,1 à +18,9 mm, hauteur 77,3 mm.
   Interface : 11 maillages détaillés (corps, ventilateur, radiateur, bloc de chauffe… et le repère « NOZZLE
@@ -80,7 +109,11 @@ Les demandes R-001 à R-011 viennent de l'inventaire du 2026-10-25 (`apex-engine
 - Besoin : le moteur écrit `sliced` et `meta` dans le bloc défini par
   `apex-ui/docs/APEX_HEADER_FORMAT.md`, et passe `apex_cipher_vectors.json`.
 - Constat : le moteur n'écrit que le marqueur en clair `; apex_sliced = 1`.
-- État : ouverte.
+- Constat du 2026-10-27 : le moteur n'écrit toujours que `; apex_sliced = 1` (`gcode_export.py`) ;
+  aucun fichier du moteur ne référence `APEX_HEADER_FORMAT` ou `apex_cipher_vectors.json`.
+- Question ouverte pour le moteur (C++ à terme, R-014) : le chiffrement doit être implémenté en C++
+  dans l'exécutable ; l'interface publie les vecteurs, le moteur les rejoue en test.
+- État : ouverte. Traiter avec R-007 (mêmes lignes d'en-tête).
 
 ### R-012 — Monter `apex` : copie des deux dépôts et première release
 - De : apex | À : apex | Contrat : — | Ouverte : 2026-10-25
@@ -122,6 +155,16 @@ Les demandes R-001 à R-011 viennent de l'inventaire du 2026-10-25 (`apex-engine
     posée à côté d'une grande pourrait disparaître sans erreur. À vérifier sur un plateau à
     deux pièces de tailles très différentes.
   - Les fichiers à un seul objet donnent le même résultat dans les deux positions.
+- Vérifié le 2026-10-27 (`apex-engine@11a5e798`, `trimesh`) : `main.py:179` vaut toujours `False`.
+  **La perte des transformations est CONFIRMÉE** : une scène de deux cubes, le second placé en x = 50,
+  donne par `concatenate(list(geometry.values()))` une boîte de −5…5 (les deux cubes superposés à
+  l'origine) contre −5…52,5 par `scene.to_geometry()`. Un 3MF dont les objets sont positionnés par
+  transformation de nœud serait donc empilé à l'origine, sans erreur. Correctif de principe :
+  `loaded.to_geometry()` à la place de `concatenate(...geometry.values())`.
+  Non vérifié : la perte d'une petite pièce par `_extract_dominant_shell` (modèle à deux pièces à
+  construire).
+- Reste côté interface : placer le réglage dans « Réglages avancés… » (C1, schéma).
+- État : ouverte (moteur : défaut + `to_geometry()` + deux tests ; interface ensuite).
 - État : partie interface faite (apex-ui@aa3e3de) : `allow_multi_mesh` et `heat_method_time_factor` (3000, décision
   du 2026-10-27) sont des « Réglages avancés de l'algorithme (développeur) » dans Paramètres (visibles en
   mode dev), envoyés explicitement dans chaque requête (pas dans « Paramètres de tranchage »). **Reste côté
@@ -153,6 +196,14 @@ Les demandes R-001 à R-011 viennent de l'inventaire du 2026-10-25 (`apex-engine
     - voies FEM directionnelle, multibranche, parties planes : vouées au retrait.
   - Mesure : death @ 0,8, 42 → 33 s (TetGen ~14 s).
   - Il manque aussi un point d'entrée exécutable natif (R-003).
+- Mise à jour du 2026-10-27 : `apex-engine` a retiré la voie FEM et Bird (contrat 2,
+  `CONTRACT_CHANGES.md`), ce qui réduit le périmètre : il ne reste plus à porter ni champ FEM, ni
+  multibranche, ni parties planes. Reste à porter : enchaînement des étapes et contrat en tableaux,
+  étape 1 (trimesh, pymeshfix, manifold3d), points listés ci-dessus. Le moteur doit confirmer la liste à
+  jour (elle date du 2026-10-26).
+- Question à l'utilisateur pour borner le chantier : l'étape 1 (réparation du maillage) doit-elle être
+  portée en C++, ou remplacée par `tetranet/` (prototype de mailleur, qui renvoie déjà
+  `InconsistentSurface`) ? Les deux sont compatibles avec R-016.
 - État : ouverte. Bloque R-012.
 
 ### R-015 — Barrière « pas de recul des résultats »
@@ -205,7 +256,32 @@ Les demandes R-001 à R-011 viennent de l'inventaire du 2026-10-25 (`apex-engine
   ou par 100 ms) ; pour le noyau C++, appeler par lots ou rappeler rarement, sans le ralentir ;
   garder la fraction croissante dans une étape. Interface — rien d'obligatoire (au besoin,
   refuser qu'une barre recule).
+- Constat du 2026-10-27 (`apex-engine@11a5e798`) : toujours deux valeurs par étape (`main.py` :
+  `progress(slug, 0.0)` puis `1.0`). Étapes les plus longues à instrumenter d'abord (mesure de
+  death @ 0,8, limite #82/#73) : étape 1 (TetGen, sous-processus : le worker peut journaliser ses
+  phases, voir `APEX_TETGEN_LOG`), étape 4 (itérations du CG), étape 8, étape 9. Le noyau natif doit
+  accepter un rappel appelé par lots (le GIL est libéré dans les points d'entrée).
 - État : ouverte.
+
+### R-018 — Reprise des en-têtes de contrat dans les demandes faites
+- De : apex | À : apex | Contrat : — | Ouverte : 2026-10-27
+- Besoin : `REQUESTS.md` garde R-002 et R-003 « ouvertes » alors que le moteur les a faites ;
+  elles ne se ferment qu'avec le commit de l'interface (RULES §8). Les lister ici pour ne pas les
+  perdre : R-002 attend R-005 (interface), R-003 attend R-004 (interface).
+- Constat : contrat à la version 2 depuis le 2026-10-27 (`CONTRACT_CHANGES.md`) : l'interface qui
+  lirait le schéma en version 1 serait refusée par la requête (code 2).
+- État : ouverte, suivi seulement ; se ferme avec R-004 et R-005.
+
+### R-019 — Version de l'application à l'ordre du jour : `VERSIONS.md` en retard sur le moteur
+- De : apex-engine | À : apex | Contrat : — | Ouverte : 2026-10-27
+- Besoin : `VERSION` vaut `alpha-0.2.1.4.3.11.1.221` (2026-10-21, interface) ; le moteur a changé de
+  méthode de tranchage (voie unique de la chaleur, contrat 2, majeur) sans que la ligne existe dans
+  `VERSIONS.md` (RULES §9.1).
+- À faire (session moteur, à la prochaine montée de version) : un niveau **majeur** (« nouvelle
+  méthode de tranchage ») : `alpha-0.2.2.0.0.0.0.<builds>` ; `git pull` d'`apex` d'abord, message de
+  commit préfixé du numéro complet. **Question à l'utilisateur** : confirmer que le retrait FEM/Bird
+  est bien un niveau majeur et non moyen.
+- État : question à l'utilisateur.
 
 ## Fermées
 
