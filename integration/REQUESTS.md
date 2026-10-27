@@ -23,7 +23,11 @@ Les demandes R-001 à R-011 viennent de l'inventaire du 2026-10-25 (`apex-engine
   tilt_sign=… z_reference=…`, ou ces quatre valeurs dans le bloc `meta` de R-010. Les deux demandes
   se traitent ensemble. Côté interface, ne plus lire `NOZZLE_PIVOT_MM` en dur : lire l'en-tête,
   refuser un fichier qui n'en a pas (sauf marqueur d'ancienne version).
-- État : ouverte.
+- État : **faite côté moteur** (apex-engine@c66b57d4, 2026-10-27) : ligne en clair `; apex_kinematics pivot_to_tip=46
+  b_sign=1 tilt_sign=1 z_reference=tip` après `; apex_sliced = 1` (`kinematics_header_line` / `parse_kinematics_header`
+  dans `file_io/gcode_export.py`) et mêmes valeurs dans `meta.kinematics` du bloc chiffré (R-010). **Reste côté
+  interface (apex-ui)** : lire cette ligne (ou `meta.kinematics`) au lieu de `NOZZLE_PIVOT_MM = 46` ; refuser un
+  fichier qui n'en porte aucune, sauf marqueur d'ancienne version.
 
 ### R-008 — Vecteurs de test de la cinématique
 - De : apex | À : apex-engine, puis apex-ui | Contrat : C4 | Ouverte : 2026-10-25
@@ -36,49 +40,11 @@ Les demandes R-001 à R-011 viennent de l'inventaire du 2026-10-25 (`apex-engine
   n'a donc rien à rejouer. Besoin précisé : un fichier `tests/vectors/kinematics_vectors.json`
   (pivot, `b_sign`, `tilt_sign`, `z_reference`, entrées, sorties, tolérance) généré par un script du
   moteur avec `--check`, copié dans `apex` par `sync.sh`.
-- État : ouverte. Dépend de R-007 pour les paramètres à inclure. Côté interface : rejouera le fichier de
-  vecteurs contre `nozzleTip` (`gcodeParse.ts`) et `native/` dès que le moteur le publie.
-
-### R-009 — Deux modèles de tête différents
-- De : apex | À : apex-engine, apex-ui | Contrat : C6 | Ouverte : 2026-10-25
-- Besoin : un seul `aetheris-4.glb`, copié par script dans l'interface.
-- Constat : SHA-256 `8f9a854d…` (`apex-engine/res/3d/toolheads/aetheris-4/aetheris-4.glb`)
-  contre `511c0807…` (`apex-ui/src/assets/models/aetheris-4.glb`). Non vérifié : si la
-  géométrie diffère ou seulement l'encodage. Les collisions de l'édition (interface) et de
-  l'étape 9 (moteur) peuvent donc ne pas porter sur la même tête.
-- Mesuré le 2026-10-27 (`trimesh`, `to_geometry()`, mm) : **les géométries diffèrent**, ce n'est pas
-  un simple réencodage.
-- Noté par un Humain : résolu, à fermer après résolution des deux côtés. (`apex-ui/src/assets/models/aetheris-4.glb`) est le modèle commun. D'ailleurs, les modèles de tête d'outil devraient être liés aux profils d'imprimante.
-
-  | | moteur | interface |
-  |---|---|---|
-  | sommets / faces | 377 / 372 | 16 237 / 21 538 |
-  | boîte (mm) | x −29,1…46,9 ; y 0,1…77,25 ; z −18,9…16,1 | x −29,1…46,9 ; y 0…76,55 ; z −17,5…17,5 |
-  | aire (mm²) | 15 729 | 31 502 |
-
-  Même étendue en X ; en Z le moteur est décalé de ~1,4 mm (−18,9…16,1 contre −17,5…17,5) et en Y de
-  0,7 mm. La copie de l'interface semble une version recentrée et plus détaillée. L'étape 9 teste des
-  points de la surface : un modèle à 4× moins de sommets et un décalage de 1,4 mm donnent des
-  distances différentes.
-- Question à l'utilisateur : quelle est la bonne tête (origine = pointe de buse, convention du moteur) ?
-  Sans réponse, le moteur ne peut pas la remplacer : l'étape 9 est mesurée avec la sienne.
-- Vérifié par apex-ui le 2026-10-27 : moteur = « Hotend v5 » (un maillage), interface = « Hotend v4 »
-  (11 maillages dont le repère « NOZZLE origin » nécessaire à `scripts/gen-head-samples.cjs`) ; la copie de
-  l'interface n'a pas été retouchée depuis `fbe30da`.
-- Décision de l'utilisateur (2026-10-27) : le modèle de l'interface (`apex-ui/src/assets/models/aetheris-4.glb`)
-  est le modèle commun ; les modèles de tête doivent être liés aux profils d'imprimante.
-- État : **interface faite** (apex-ui@ecb9b17) : le profil désigne son modèle (`apex.toolhead_model`, documenté dans
-  `PRINTER_PROFILE_FORMAT.md`) et l'aperçu le charge par ce lien (`src/utils/toolheadModels.ts`). **Reste côté
-  moteur** : remplacer `res/3d/toolheads/aetheris-4/aetheris-4.glb` par une copie par script (C6, `--check`) du
-  fichier de l'interface, relire l'étape 9 avec cette tête (origine = pointe de buse), lier la tête au
-  `MachineProfile`. Se ferme des deux côtés.
-- Précisions pour le moteur (relecture du 2026-10-27, rien n'est encore fait côté moteur) :
-  1. la copie se fait par un script avec `--check` (§4.2), jamais à la main ;
-  2. l'origine de la scène doit être la pointe de buse (convention de `load_toolhead_mesh`) : les deux
-     boîtes diffèrent de ~1,4 mm en Z, ce qui fausserait l'étape 9 si l'origine changeait ;
-  3. la tête passe de 377 à 16 237 sommets : remesurer l'étape 9, 5b et 10 sur les quatre modèles
-     (coût d'échantillonnage `toolhead_sample_spacing`, collisions des limites #64 et #67), et consigner
-     la variation avant d'avancer l'épingle (RULES §7, contrôle 6) ; une variation est attendue.
+- État : **faite côté moteur** (apex-engine@c66b57d4) : `tests/vectors/kinematics_vectors.json` (27 vecteurs, 3
+  configurations dont `b_sign=-1`, `z_reference=pivot`, Y déroulé, centre), généré par
+  `scripts/gen_kinematics_vectors.py --check`, rejoué par `tests/test_kinematics_vectors.py`. **Reste côté interface
+  (apex-ui)** : le copier (`sync.sh` le range sous `slicer-engine/tests/vectors/`) et rejouer ses vecteurs contre
+  `nozzleTip` (`gcodeParse.ts`) et le noyau `native/` (RULES §6).
 
 ### R-010 — Le moteur écrit le bloc d'en-tête chiffré
 - De : apex-ui | À : apex-engine | Contrat : C5 | Ouverte : 2026-10-25
@@ -89,7 +55,13 @@ Les demandes R-001 à R-011 viennent de l'inventaire du 2026-10-25 (`apex-engine
   aucun fichier du moteur ne référence `APEX_HEADER_FORMAT` ou `apex_cipher_vectors.json`.
 - Question ouverte pour le moteur (C++ à terme, R-014) : le chiffrement doit être implémenté en C++
   dans l'exécutable ; l'interface publie les vecteurs, le moteur les rejoue en test.
-- État : ouverte. Traiter avec R-007 (mêmes lignes d'en-tête).
+- État : **faite côté moteur** (apex-engine@c66b57d4) : `file_io/apex_header.py` écrit `sliced` + `meta` (générateur,
+  contrat, cinématique d'écriture, hauteur de couche, vitesses…) dans le bloc `apex_block_begin v1`, placé après
+  l'en-tête en clair. Les étages 1 à 6 sont **vérifiés contre `apex_cipher_vectors.json`** de l'interface
+  (copié par `scripts/sync_from_ui.py --check`), le fichier est reproductible (nonces dérivés du contenu). Réserves :
+  AES-GCM vient du paquet Python `cryptography` (sans lui le bloc n'est pas écrit, jamais une erreur) ; le port natif
+  se fait avec R-014. **Reste (contrôle RULES §7.4)** : déchiffrer un G-code produit par le moteur avec
+  `apexHeader.ts` ; l'interface conserve `sliced`/`meta` et ajoute son `journal`.
 
 ### R-012 — Monter `apex` : copie des deux dépôts et première release
 - De : apex | À : apex | Contrat : — | Ouverte : 2026-10-25
@@ -117,38 +89,6 @@ Les demandes R-001 à R-011 viennent de l'inventaire du 2026-10-25 (`apex-engine
   par `sync.sh` après R-009 (moteur) et la fusion des branches des deux dépôts. Ordre proposé :
   R-014 (moteur natif) → exécutable sans Python → workflow Windows → contrôles §7 → pré-release.
 - État : en cours, release bloquée par R-014.
-
-### R-013 — Plusieurs pièces sur le plateau, par défaut
-- De : utilisateur | À : apex-engine, puis apex-ui | Contrat : C1 | Ouverte : 2026-10-25
-- Besoin (décision de l'utilisateur) : `PipelineParams.allow_multi_mesh` passe à vrai par
-  défaut, car l'interface assemble le plateau en un seul maillage et un slicer doit accepter
-  plusieurs pièces. Dans l'interface, ce réglage va dans « Réglages avancés de l'algorithme
-  pour développeur », pas dans « Paramètres de tranchage ».
-- Constat (`apex-engine@6e0081e`) :
-  - `main.py` : `allow_multi_mesh: bool = False` ; `step1_ingest._load_raw_mesh` refuse
-    alors un fichier à plusieurs objets.
-  - Avec le réglage actif, `_load_raw_mesh` concatène `loaded.geometry.values()` : les
-    transformations de la scène (placement des objets d'un 3MF) sont perdues. À vérifier,
-    et à remplacer par `loaded.to_geometry()` si c'est le cas.
-  - `_extract_dominant_shell` garde la plus grosse coque et jette les autres quand elle fait
-    au moins 95 % du volume et que le maillage combiné n'est pas étanche : une petite pièce
-    posée à côté d'une grande pourrait disparaître sans erreur. À vérifier sur un plateau à
-    deux pièces de tailles très différentes.
-  - Les fichiers à un seul objet donnent le même résultat dans les deux positions.
-- Vérifié le 2026-10-27 (`apex-engine@11a5e798`, `trimesh`) : `main.py:179` vaut toujours `False`.
-  **La perte des transformations est CONFIRMÉE** : une scène de deux cubes, le second placé en x = 50,
-  donne par `concatenate(list(geometry.values()))` une boîte de −5…5 (les deux cubes superposés à
-  l'origine) contre −5…52,5 par `scene.to_geometry()`. Un 3MF dont les objets sont positionnés par
-  transformation de nœud serait donc empilé à l'origine, sans erreur. Correctif de principe :
-  `loaded.to_geometry()` à la place de `concatenate(...geometry.values())`.
-  Non vérifié : la perte d'une petite pièce par `_extract_dominant_shell` (modèle à deux pièces à
-  construire).
-- Reste côté interface : placer le réglage dans « Réglages avancés… » (C1, schéma).
-- État : partie interface faite (apex-ui@aa3e3de) : `allow_multi_mesh` et `heat_method_time_factor` (3000,
-  décision du 2026-10-27) sont des « Réglages avancés de l'algorithme (développeur) » dans Paramètres (visibles
-  en mode dev), envoyés explicitement dans chaque requête (pas dans « Paramètres de tranchage »). **Reste côté
-  moteur** : défaut à vrai, `loaded.to_geometry()` à la place de la concaténation (perte des transformations
-  confirmée), deux tests, et le cas d'une petite pièce jetée par `_extract_dominant_shell` (non vérifié).
 
 ### R-014 — Moteur 100 % C++ avant toute release
 - De : utilisateur | À : apex-engine | Contrat : C2 | Ouverte : 2026-10-26
@@ -217,16 +157,12 @@ Les demandes R-001 à R-011 viennent de l'inventaire du 2026-10-25 (`apex-engine
   `tetranet/tools/diagnosis_message.py`. Les auto-intersections viennent de l'étape 1 du moteur.
 - À faire : moteur — champ de résultat (type de défaut + nombres) et refus avec ce statut ;
   interface — afficher le texte, le même dans les deux langues prévues, accords compris.
-- État : en cours. Moteur : refus fait (`SurfaceInconsistentError`, statut `surface_inconsistent`, code 3,
-  `message` accordé et `diagnostic`) — mais il ne se déclenche qu'avec `mesher="tetranet"` (le défaut est
-  TetGen). Interface (apex-ui@aa3e3de) : le message du moteur est affiché tel quel dans la fenêtre de tranchage.
-  **Reste** : (1) l'interface n'a pas de langues (tout est en français) ; la reconstruction traduisible du
-  texte à partir des nombres demande que le diagnostic porte aussi `self_intersections` et `volume_pct` ;
-  (2) décider si TetraNet devient le mailleur par défaut, faute de quoi ce refus n'arrive jamais.
-  Vérifié le 2026-10-27 (`apex-engine`) : `PipelineParams.mesher` vaut encore `"tetgen"` (`main.py:221`) ;
-  `tetranet/tools/diagnosis_message.py` prend déjà `self_intersections` et `volume_pct` en entrée, mais
-  `slice_cli.py` ne rend que `diagnostic` tel que le lève `SurfaceInconsistentError` : ajouter ces deux
-  nombres au diagnostic suffit pour (1). Le point (2) est une décision de l'utilisateur (lien avec R-014).
+- État : en cours. Moteur : refus fait (`SurfaceInconsistentError`, statut `surface_inconsistent`, code 3, `message`
+  accordé) ; **le diagnostic porte maintenant `self_intersections` et `volume_pct`** (apex-engine@c66b57d4, test avec un
+  noyau simulé) : l'interface peut reconstruire le texte à partir des nombres. Interface (apex-ui@aa3e3de) : le message du
+  moteur est affiché tel quel. **Reste** : (1) interface — reconstruire le texte traduisible depuis `diagnostic`
+  (l'interface n'a pas de langues aujourd'hui) ; (2) **question à l'utilisateur** : TetraNet devient-il le mailleur par
+  défaut ? `PipelineParams.mesher` vaut toujours `"tetgen"`, donc ce refus n'arrive jamais par défaut.
 
 ### R-017 — Progression réelle à l'intérieur de chaque étape
 - De : apex-ui | À : apex-engine | Contrat : C3 | Ouverte : 2026-10-27
@@ -252,7 +188,16 @@ Les demandes R-001 à R-011 viennent de l'inventaire du 2026-10-25 (`apex-engine
   death @ 0,8, limite #82/#73) : étape 1 (TetGen, sous-processus : le worker peut journaliser ses
   phases, voir `APEX_TETGEN_LOG`), étape 4 (itérations du CG), étape 8, étape 9. Le noyau natif doit
   accepter un rappel appelé par lots (le GIL est libéré dans les points d'entrée).
-- État : ouverte.
+- État : **faite côté moteur** (apex-engine@83bf565c, 2026-10-27), à valider sur Windows. `core/progress.py` : fractions
+  croissantes dans ]0, 1[, au plus une par pas de 1 % et par 100 ms, jamais estimées. Boucles instrumentées : couches
+  (5, 5b), remplissage (6, natif par tranches de 32 couches ou plus), collision (9, natif par tranches de 5 000 points),
+  ajustement (10), écriture du G-code ; jalons réels pour l'étape 1 (lecture, réparation, maillage volumique), 4, 7, 8.
+  Vérifié avec le noyau natif compilé sur un poste Linux : polylignes de l'étape 6 et événements de l'étape 9
+  **identiques** à l'appel unique (l_shape), suites 399 (Python) et 506 (natif) passées. Sur un cube : 26 lignes pour
+  l'export, 5 à 7 par étape à jalons. **Restent indivisibles faute de rappel dans le noyau** : TetGen (~14 s sur death), le
+  CG de la méthode de la chaleur et la cinématique inverse native (une barre qui reste ~10 s sur une valeur est donc
+  normale à ces endroits ; ne rien animer). Interface : rien d'obligatoire. À fermer après un tranchage sur le build
+  Windows réel.
 
 ### R-019 — Version de l'application à l'ordre du jour : `VERSIONS.md` en retard sur le moteur
 - De : apex-engine | À : apex | Contrat : — | Ouverte : 2026-10-27
@@ -263,7 +208,9 @@ Les demandes R-001 à R-011 viennent de l'inventaire du 2026-10-25 (`apex-engine
   méthode de tranchage ») : `alpha-0.2.2.0.0.0.0.221` (majeur +1, niveaux à droite remis à zéro, Builds inchangé) ; `git pull` d'`apex` d'abord, message de
   commit préfixé du numéro complet. **Question à l'utilisateur** : confirmer que le retrait FEM/Bird
   est bien un niveau majeur et non moyen.
-- État : question à l'utilisateur.
+- État : question à l'utilisateur. Le moteur a avancé le numéro à `alpha-0.2.2.0.2.0.0.221` (majeur +1 pour la voie
+  chaleur seule, puis deux « mineur » pour cette session : en-tête chiffré + tête de l'interface, puis progression réelle)
+  pour ne pas laisser `VERSION` en retard ; **à corriger si le retrait FEM/Bird n'est pas un niveau majeur**.
 
 ### R-020 — Lier le modèle de tête au profil d'imprimante, côté moteur
 - De : utilisateur (note sur R-009) | À : apex-engine | Contrat : C6, C7 | Ouverte : 2026-10-27
@@ -273,9 +220,94 @@ Les demandes R-001 à R-011 viennent de l'inventaire du 2026-10-25 (`apex-engine
   de tranchage (`machine_profile` envoyé par l'interface, R-006) ne dit pas quelle tête. Le chemin du
   fichier ne doit pas traverser le contrat (machine de l'utilisateur ≠ machine du moteur) : proposition,
   un identifiant de modèle (`aetheris-4`) que le moteur résout dans ses `res/3d/toolheads/<id>/`.
-- État : ouverte. Se traite avec R-009 (même fichier, même session moteur).
+- État : **faite côté moteur** (apex-engine@c66b57d4) : `MachineProfile.toolhead_id` (défaut `"aetheris-4"`, dans le
+  schéma, ajout compatible), `load_toolhead_by_id` (seuls lettres, chiffres, `-` et `_` : jamais un chemin),
+  `main.ensure_toolhead` pour les profils venus d'une requête. **Reste côté interface** : envoyer `toolhead_id` dans
+  le `machine_profile` de la requête, tiré de `apex.toolhead_model` du profil d'imprimante ; un identifiant inconnu donne
+  `nozzle_model_checked=false` à l'étape 9 (journal), pas une erreur.
+
+### R-021 — Échantillonnage de la tête de collision (tête v4 de l'interface)
+- De : apex-engine | À : utilisateur | Contrat : C6 | Ouverte : 2026-10-27
+- Besoin : décider comment l'étape 9 échantillonne la tête de 16 237 sommets que l'interface fournit.
+- Constat : tous les sommets de la tête sont pris (`_surface_sample_points`), soit 20 527 points contre 1 540 avec
+  l'ancienne tête : 3 à 6 fois plus d'événements de collision avant ajustement et +30 à +60 % de temps de pipeline
+  (voir R-009). Les mesures de collisions des limites #64 et #67 du moteur datent de l'ancienne tête ; matière sans
+  appui et collisions APRÈS l'étape 10 ne sont pas remesurées.
+- Options : (a) garder tous les sommets (plus fidèle, plus lent) ; (b) échantillonner la surface à pas fixe (par
+  exemple 1 point par 2 mm²) ; (c) une tête de collision simplifiée dérivée de la v4 (enveloppe), distincte du modèle
+  d'affichage. Le moteur mesurera (b) et (c) sur les quatre modèles si l'utilisateur le demande ; rien n'est activé
+  sans mesure (CLAUDE.md du moteur).
+- État : question à l'utilisateur.
 
 ## Fermées
+
+### R-009 — Deux modèles de tête différents
+- De : apex | À : apex-engine, apex-ui | Contrat : C6 | Ouverte : 2026-10-25
+- Besoin : un seul `aetheris-4.glb`, copié par script dans l'interface.
+- Constat : SHA-256 `8f9a854d…` (`apex-engine/res/3d/toolheads/aetheris-4/aetheris-4.glb`)
+  contre `511c0807…` (`apex-ui/src/assets/models/aetheris-4.glb`). Non vérifié : si la
+  géométrie diffère ou seulement l'encodage. Les collisions de l'édition (interface) et de
+  l'étape 9 (moteur) peuvent donc ne pas porter sur la même tête.
+- Mesuré le 2026-10-27 (`trimesh`, `to_geometry()`, mm) : **les géométries diffèrent**, ce n'est pas
+  un simple réencodage.
+- Noté par un Humain : résolu, à fermer après résolution des deux côtés. (`apex-ui/src/assets/models/aetheris-4.glb`) est le modèle commun. D'ailleurs, les modèles de tête d'outil devraient être liés aux profils d'imprimante.
+
+  | | moteur | interface |
+  |---|---|---|
+  | sommets / faces | 377 / 372 | 16 237 / 21 538 |
+  | boîte (mm) | x −29,1…46,9 ; y 0,1…77,25 ; z −18,9…16,1 | x −29,1…46,9 ; y 0…76,55 ; z −17,5…17,5 |
+  | aire (mm²) | 15 729 | 31 502 |
+
+  Même étendue en X ; en Z le moteur est décalé de ~1,4 mm (−18,9…16,1 contre −17,5…17,5) et en Y de
+  0,7 mm. La copie de l'interface semble une version recentrée et plus détaillée. L'étape 9 teste des
+  points de la surface : un modèle à 4× moins de sommets et un décalage de 1,4 mm donnent des
+  distances différentes.
+- Question à l'utilisateur : quelle est la bonne tête (origine = pointe de buse, convention du moteur) ?
+  Sans réponse, le moteur ne peut pas la remplacer : l'étape 9 est mesurée avec la sienne.
+- Vérifié par apex-ui le 2026-10-27 : moteur = « Hotend v5 » (un maillage), interface = « Hotend v4 »
+  (11 maillages dont le repère « NOZZLE origin » nécessaire à `scripts/gen-head-samples.cjs`) ; la copie de
+  l'interface n'a pas été retouchée depuis `fbe30da`.
+- Décision de l'utilisateur (2026-10-27) : le modèle de l'interface (`apex-ui/src/assets/models/aetheris-4.glb`)
+  est le modèle commun ; les modèles de tête doivent être liés aux profils d'imprimante.
+- État : **faite des deux côtés** (2026-10-27). Interface (apex-ui@ecb9b17) : le profil désigne son modèle
+  (`apex.toolhead_model`). Moteur (apex-engine@c66b57d4) : `res/3d/toolheads/aetheris-4/aetheris-4.glb` est la copie du
+  fichier de l'interface (SHA-256 `511c0807…`) par `scripts/sync_from_ui.py --check` ; origine vérifiée (face de buse plate
+  de 1,1 mm de rayon dans le plan z = 0, centrée sur l'origine) ; test d'étendues adapté. **Effet mesuré sur l'étape 9**
+  (noyau natif, événements avant ajustement, tous résolus par l'étape 10) : l_shape 26 → 146, l-triple 46 → 302, death
+  395 → 1 420, turkish 308 → 634 ; pipeline complet death 38,9 → 50,5 s, turkish 44,2 → 71,8 s. Cause : 20 527 points
+  d'échantillonnage de la tête (1 540 avec l'ancienne). Suite : R-021.
+
+### R-013 — Plusieurs pièces sur le plateau, par défaut
+- De : utilisateur | À : apex-engine, puis apex-ui | Contrat : C1 | Ouverte : 2026-10-25
+- Besoin (décision de l'utilisateur) : `PipelineParams.allow_multi_mesh` passe à vrai par
+  défaut, car l'interface assemble le plateau en un seul maillage et un slicer doit accepter
+  plusieurs pièces. Dans l'interface, ce réglage va dans « Réglages avancés de l'algorithme
+  pour développeur », pas dans « Paramètres de tranchage ».
+- Constat (`apex-engine@6e0081e`) :
+  - `main.py` : `allow_multi_mesh: bool = False` ; `step1_ingest._load_raw_mesh` refuse
+    alors un fichier à plusieurs objets.
+  - Avec le réglage actif, `_load_raw_mesh` concatène `loaded.geometry.values()` : les
+    transformations de la scène (placement des objets d'un 3MF) sont perdues. À vérifier,
+    et à remplacer par `loaded.to_geometry()` si c'est le cas.
+  - `_extract_dominant_shell` garde la plus grosse coque et jette les autres quand elle fait
+    au moins 95 % du volume et que le maillage combiné n'est pas étanche : une petite pièce
+    posée à côté d'une grande pourrait disparaître sans erreur. À vérifier sur un plateau à
+    deux pièces de tailles très différentes.
+  - Les fichiers à un seul objet donnent le même résultat dans les deux positions.
+- Vérifié le 2026-10-27 (`apex-engine@11a5e798`, `trimesh`) : `main.py:179` vaut toujours `False`.
+  **La perte des transformations est CONFIRMÉE** : une scène de deux cubes, le second placé en x = 50,
+  donne par `concatenate(list(geometry.values()))` une boîte de −5…5 (les deux cubes superposés à
+  l'origine) contre −5…52,5 par `scene.to_geometry()`. Un 3MF dont les objets sont positionnés par
+  transformation de nœud serait donc empilé à l'origine, sans erreur. Correctif de principe :
+  `loaded.to_geometry()` à la place de `concatenate(...geometry.values())`.
+  Non vérifié : la perte d'une petite pièce par `_extract_dominant_shell` (modèle à deux pièces à
+  construire).
+- Reste côté interface : placer le réglage dans « Réglages avancés… » (C1, schéma).
+- État : **faite des deux côtés.** Interface (apex-ui@aa3e3de) : réglage dans « Réglages avancés de l'algorithme
+  (développeur) », envoyé explicitement. Moteur (apex-engine@c66b57d4, 2026-10-27) : `allow_multi_mesh=True` par défaut,
+  `loaded.to_geometry()` (transformations de nœud conservées), et `_extract_dominant_shell` ne jette plus une composante à
+  volume positif d'au moins 0,1 % du total (les fragments de `turkish.stl`, à volume signé négatif ou ~1e-6, sont
+  toujours écartés). Trois tests ; un plateau de deux pièces (cube de 40 mm et cube de 6 mm) est maillé avec les deux.
 
 ### R-002 — Numéro de contrat dans le schéma
 - De : apex | À : apex-engine | Contrat : C1 | Ouverte : 2026-10-25
