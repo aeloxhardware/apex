@@ -199,6 +199,27 @@ Les demandes R-001 à R-011 viennent de l'inventaire du 2026-10-25 (`apex-engine
   interface — afficher le texte, le même dans les deux langues prévues, accords compris.
 - État : ouverte.
 
+### R-017 — Progression réelle à l'intérieur de chaque étape
+- De : apex-ui | À : apex-engine | Contrat : C3 | Ouverte : 2026-10-27
+- Besoin : l'interface montre une barre par étape (11 barres, une par étape de `main.py steps`) ;
+  pour qu'elles avancent progressivement au lieu de sauter de 0 à 100 %, le moteur doit rapporter
+  des fractions intermédiaires pendant chaque étape, calculées sur du travail réellement fait
+  (RULES §5.3 : jamais une durée estimée).
+- Constat : `run_pipeline` n'appelle `progress(slug, fraction)` qu'à 0,0 et 1,0 par étape
+  (`main.py`, docstring : « pas de fraction intermédiaire pour l'instant ») ; le journal
+  `out/benchy_tilted_tf3000/stderr.log` ne contient que ces deux valeurs par étape, alors que
+  l'étape 8 traite 241 944 points et l'étape 5 extrait 310 couches. Le format C3 (ligne
+  `{"type":"step","slug","fraction"}` sur la sortie d'erreur) permet déjà des valeurs
+  intermédiaires : aucun changement de contrat. L'interface lit déjà `fraction` et l'affiche.
+- À faire : moteur — transmettre le rappel de progression aux boucles de chaque étape, avec une
+  unité de travail par étape (par exemple couches extraites, couches remplies, passes
+  ordonnancées, points de la cinématique inverse, points testés en collision, itérations de
+  l'ajustement, lignes de G-code écrites) ; limiter le débit (au plus un message par pas de 1 %
+  ou par 100 ms) ; pour le noyau C++, appeler par lots ou rappeler rarement, sans le ralentir ;
+  garder la fraction croissante dans une étape. Interface — rien d'obligatoire (au besoin,
+  refuser qu'une barre recule).
+- État : ouverte.
+
 ## Fermées
 
 ### R-011 — Python embarqué et dépendances du moteur
