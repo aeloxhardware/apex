@@ -52,7 +52,10 @@ C'est la règle qui évite de saturer une seule session.
 4. **Ce qu'une session lit de l'autre côté** : seulement le contrat (§3) et les fichiers qu'il
    désigne. Elle ne charge pas le `CLAUDE.md` complet de l'autre dépôt : c'est ce qui sature.
 5. **En début de session** : lire ce fichier, puis les demandes ouvertes adressées à son dépôt
-   dans `REQUESTS.md`. **En fin de session** : mettre à jour l'état des demandes traitées, et
+   dans `REQUESTS.md`. **Toujours, toujours, depuis le distant** (décision de l'utilisateur,
+   2026-10-27) : `git fetch` puis lecture de `origin/main` (`git show origin/main:integration/RULES.md`,
+   idem pour `REQUESTS.md`), jamais d'une copie locale, qui peut être en retard ; relire de la même
+   façon avant d'écrire dans l'un de ces fichiers. **En fin de session** : mettre à jour l'état des demandes traitées, et
    ouvrir celles que la session a découvertes.
 
 6. **Vérifier le dépôt avant d'écrire.** `git remote -v` et `git log` doivent désigner le
