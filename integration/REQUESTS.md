@@ -141,7 +141,11 @@ Les demandes R-001 à R-011 viennent de l'inventaire du 2026-10-25 (`apex-engine
   (`src/utils/sliceStepLabels.ts`, déjà prêts pour ces deux identifiants, avec les accents que le journal du moteur
   n'a pas) ; garde l'ancien identifiant dans `CONTRACT_CHANGES.md`.
 - Côté interface : en attendant, l'étape unique `ingest` s'affiche « Import et tétraédralisation du maillage triangulé ».
-- État : ouverte.
+- État : **faite côté moteur** (apex-engine@62b4698b, 2026-10-28) : `main.py steps` liste `import` (« Import du modele ») puis
+  `tetrahedralization` (« Tetraedralisation du maillage triangule ») au lieu de `ingest`, chacune de 0 à 1 ; l'étape 1 bascule
+  de l'une à l'autre quand la surface est lue, nettoyée et réparée (TetraNet : après la lecture). L'ancien slug `ingest` a disparu
+  des lignes de progression ; entrée dans `CONTRACT_CHANGES.md`, numéro de contrat inchangé (2). À fermer quand l'interface
+  l'a vérifié dans un tranchage réel.
 
 ## Fermées
 
