@@ -7,6 +7,7 @@ Format et règles : [`integration/RULES.md`](integration/RULES.md), §9.
 Une ligne par version, la plus récente en haut :
 `<version> — <date> — <dépôt> @ <commit> — <ce qui change>`
 
+- `alpha-0.2.2.0.3.0.0.221` — 2026-10-28 — apex-engine @ 4389a561 — lissage non-planaire sur la voie chaleur (`params.skin`, opt-in, désactivé par défaut) : zones accessibles, creusement du corps, trajectoires de surface, ordre et collisions ; mesuré de bout en bout sur l-triple, Benchy et death (turkish en cours).
 - `alpha-0.2.2.0.2.1.0.221` — 2026-10-28 — apex-engine @ 62b4698b — étape 1 scindée en « import » et « tetrahedralization » (R-022, contrat C3, ajout compatible).
 - `alpha-0.2.2.0.2.0.0.221` — 2026-10-27 — apex-engine @ 83bf565c — progression réelle à l'intérieur des étapes (R-017, contrat C3, ajout compatible).
 - `alpha-0.2.2.0.1.0.0.221` — 2026-10-27 — apex-engine @ c66b57d4 — en-tête chiffré Apex et ligne de cinématique dans le G-code (R-007, R-010), vecteurs de cinématique (R-008), plusieurs pièces par défaut (R-013), tête de l'interface (R-009, R-020), diagnostic du refus de surface (R-016).
