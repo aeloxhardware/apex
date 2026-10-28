@@ -147,6 +147,31 @@ Les demandes R-001 à R-011 viennent de l'inventaire du 2026-10-25 (`apex-engine
   des lignes de progression ; entrée dans `CONTRACT_CHANGES.md`, numéro de contrat inchangé (2). À fermer quand l'interface
   l'a vérifié dans un tranchage réel.
 
+### R-023 — Expliquer chaque paramètre exposé à l'utilisateur
+- De : utilisateur (via apex-ui) | À : apex-engine | Contrat : C1 | Ouverte : 2026-10-28
+- Besoin (règle de l'utilisateur, 2026-10-28) : chaque paramètre que l'interface montre dans son panneau « Réglages Apex »
+  porte une vraie infobulle : à quoi il sert, ce que change sa valeur, ce que le moteur a mesuré (ou « non mesuré »).
+  Le moteur est la source de ces faits ; l'interface ne doit pas en inventer.
+- Constat (apex-ui@18d01f3 et suivants) : l'interface a rédigé les 21 textes (`src/utils/engineSettingsHelp.json`) à partir
+  des commentaires du code du moteur (`step4_field_solver.py`, `step8_machine_toolpath.py`, `step9_collision_sim.py`,
+  `gcode_export.py`, `main.py`) ; `schema:verify` échoue si un réglage de la liste n'a pas de texte. Les descriptions du
+  schéma (`config/params.schema.json`) ne servent pas : ce sont des `repr` de dataclasse, sans explication.
+- À faire (le moteur choisit comment) :
+  1. relire les 21 textes et corriger ce qui est faux ou imprécis ; ceux qui ne viennent d'aucun commentaire du moteur sont
+     des connaissances générales d'impression 3D à confirmer ou retirer : `gcode_params.nozzle_temp`,
+     `gcode_params.travel_speed` (« plus de vibrations »), `gcode_params.retract_length` (« trop longue : bouchon »),
+     `gcode_params.print_speed`, `toolpath2d.wall_count` et `toolpath2d.infill_density` (effets sur la solidité) ;
+  2. dire ce qui n'est pas mesuré et devrait l'être pour ce panneau : `field_solver.heat_method_time_factor` au-delà de
+     1000 (l'utilisateur a demandé 300 000 pour l'application ; le moteur n'a mesuré que 10 à 1000), la plage utile de
+     `resolution` hors de 0,8 à 3, les bornes des 8 réglages sans minimum ni maximum dans la liste (`toolpath2d.wall_count`,
+     `collision.safety_margin`, `gcode_params.print_speed`, `nozzle_temp`, `travel_speed`, `travel_clearance`,
+     `retract_length`, `max_y_turns`) ;
+  3. pour la suite : joindre à chaque paramètre de la liste fournie à l'interface un champ `help` (`what`, `effect`,
+     `caution`, mêmes clés que `engineSettingsHelp.json`), ou, mieux, faire écrire ces champs par
+     `scripts/gen_params.py` dans `params.schema.json` à partir des commentaires du code, pour que l'explication
+     voyage avec le schéma (alors l'interface cesse de les recopier).
+- État : ouverte.
+
 ## Fermées
 
 ### R-007 — Longueur pivot-pointe portée par le G-code
