@@ -108,6 +108,11 @@ Les demandes R-001 à R-011 viennent de l'inventaire du 2026-10-25 (`apex-engine
   moteur est affiché tel quel. **Reste** : (1) interface — reconstruire le texte traduisible depuis `diagnostic`
   (l'interface n'a pas de langues aujourd'hui) ; (2) **question à l'utilisateur** : TetraNet devient-il le mailleur par
   défaut ? `PipelineParams.mesher` vaut toujours `"tetgen"`, donc ce refus n'arrive jamais par défaut.
+  **Décision de l'utilisateur (2026-10-28)** : TetraNet est le mailleur par défaut **de l'application** (réglage « Tétraédraliseur »,
+  niveau développeur, envoyé explicitement dans chaque requête : `params.mesher = "tetranet"`) ; le défaut du moteur reste
+  `"tetgen"`, à lui de dire s'il veut le changer. Vérifié (apex-ui, 2026-10-28) : `death` tranché avec TetraNet en 20 s, sans
+  refus. À savoir : le journal du moteur dit « TetraNet : raffinement près du plateau pas encore porté, ignoré »
+  (`near_platform_resolution` sans effet avec TetraNet).
 
 ### R-019 — Version de l'application à l'ordre du jour : `VERSIONS.md` en retard sur le moteur
 - De : apex-engine | À : apex | Contrat : — | Ouverte : 2026-10-27
@@ -121,6 +126,22 @@ Les demandes R-001 à R-011 viennent de l'inventaire du 2026-10-25 (`apex-engine
 - État : question à l'utilisateur. Le moteur a avancé le numéro à `alpha-0.2.2.0.2.0.0.221` (majeur +1 pour la voie
   chaleur seule, puis deux « mineur » pour cette session : en-tête chiffré + tête de l'interface, puis progression réelle)
   pour ne pas laisser `VERSION` en retard ; **à corriger si le retrait FEM/Bird n'est pas un niveau majeur**.
+
+### R-022 — Séparer « Import » et « Tétraédralisation » dans les étapes
+- De : utilisateur (via apex-ui) | À : apex-engine | Contrat : C3 | Ouverte : 2026-10-28
+- Besoin (décision de l'utilisateur) : la fenêtre de tranchage affiche deux lignes à la place de « Lecture et maillage
+  volumique du modèle » : **« Import »** puis **« Tétraédralisation du maillage triangulé »**, chacune avec sa propre
+  barre. Le moteur doit donc publier deux étapes au lieu d'une.
+- Constat (`apex-engine@83bf565c`) : `PIPELINE_STEPS` (`main.py:395`) a une seule étape `ingest` (« Lecture et maillage
+  volumique du modele ») ; l'étape 1 émet déjà des jalons (lecture, réparation, maillage volumique, R-017), qui se
+  rangent naturellement dans les deux nouvelles étapes. L'interface lit la liste de `main.py steps` : rien à changer
+  chez elle pour une étape de plus (ajout compatible, le numéro de contrat peut rester 2 si tu le juges ainsi).
+- Proposition (le moteur choisit) : identifiants `import` (lecture, réparation de la surface) et `tetrahedralization`
+  (TetGen ou TetraNet) ; `ingest` disparaît de la liste. Les libellés affichés sont ceux de l'interface
+  (`src/utils/sliceStepLabels.ts`, déjà prêts pour ces deux identifiants, avec les accents que le journal du moteur
+  n'a pas) ; garde l'ancien identifiant dans `CONTRACT_CHANGES.md`.
+- Côté interface : en attendant, l'étape unique `ingest` s'affiche « Import et tétraédralisation du maillage triangulé ».
+- État : ouverte.
 
 ## Fermées
 
