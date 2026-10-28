@@ -226,6 +226,8 @@ Les demandes R-001 à R-011 viennent de l'inventaire du 2026-10-25 (`apex-engine
   le `machine_profile` de la requête, tiré de `apex.toolhead_model` du profil d'imprimante ; un identifiant inconnu donne
   `nozzle_model_checked=false` à l'étape 9 (journal), pas une erreur.
 
+## Fermées
+
 ### R-021 — Échantillonnage de la tête de collision (tête v4 de l'interface)
 - De : apex-engine | À : utilisateur | Contrat : C6 | Ouverte : 2026-10-27
 - Besoin : décider comment l'étape 9 échantillonne la tête de 16 237 sommets que l'interface fournit.
@@ -237,9 +239,10 @@ Les demandes R-001 à R-011 viennent de l'inventaire du 2026-10-25 (`apex-engine
   exemple 1 point par 2 mm²) ; (c) une tête de collision simplifiée dérivée de la v4 (enveloppe), distincte du modèle
   d'affichage. Le moteur mesurera (b) et (c) sur les quatre modèles si l'utilisateur le demande ; rien n'est activé
   sans mesure (CLAUDE.md du moteur).
-- État : question à l'utilisateur.
-
-## Fermées
+- État : **décidée par l'utilisateur (2026-10-28) : option (a), tout garder** — tous les sommets de la tête de l'interface
+  restent échantillonnés. Aucun changement de code ; le surcoût mesuré (+30 à +60 % de temps, 3 à 6 fois plus d'événements
+  avant ajustement) est accepté. Reste au moteur, sans bloquer : remesurer la matière sans appui et les collisions
+  APRÈS l'étape 10 avec cette tête, et mettre à jour les chiffres des limites #64 et #67.
 
 ### R-009 — Deux modèles de tête différents
 - De : apex | À : apex-engine, apex-ui | Contrat : C6 | Ouverte : 2026-10-25
@@ -275,7 +278,7 @@ Les demandes R-001 à R-011 viennent de l'inventaire du 2026-10-25 (`apex-engine
   de 1,1 mm de rayon dans le plan z = 0, centrée sur l'origine) ; test d'étendues adapté. **Effet mesuré sur l'étape 9**
   (noyau natif, événements avant ajustement, tous résolus par l'étape 10) : l_shape 26 → 146, l-triple 46 → 302, death
   395 → 1 420, turkish 308 → 634 ; pipeline complet death 38,9 → 50,5 s, turkish 44,2 → 71,8 s. Cause : 20 527 points
-  d'échantillonnage de la tête (1 540 avec l'ancienne). Suite : R-021.
+  d'échantillonnage de la tête (1 540 avec l'ancienne). Suite : R-021 (décidée : tout garder).
 
 ### R-013 — Plusieurs pièces sur le plateau, par défaut
 - De : utilisateur | À : apex-engine, puis apex-ui | Contrat : C1 | Ouverte : 2026-10-25
