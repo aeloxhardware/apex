@@ -8,61 +8,6 @@ Les demandes R-001 à R-011 viennent de l'inventaire du 2026-10-25 (`apex-engine
 
 ## Ouvertes
 
-### R-007 — Longueur pivot-pointe portée par le G-code
-- De : apex-ui | À : apex-engine | Contrat : C4, C5 | Ouverte : 2026-10-25
-- Besoin : le G-code dit avec quelle longueur pivot-pointe, quel `b_sign`, quel `tilt_sign` et
-  quelle référence de Z il a été écrit, pour que l'aperçu et le noyau d'édition relisent la
-  pointe exactement.
-- Constat : l'interface suppose `NOZZLE_PIVOT_MM = 46` (`gcodeParse.ts`) ; le moteur rend cette
-  longueur réglable (`config/pivot_to_tip.json`, `GcodeParams.pivot_to_tip`). Un G-code exporté
-  avec une autre longueur serait mal relu, sans erreur.
-- Constat du 2026-10-27 (`apex-engine@11a5e798`) : inchangé. `GcodeParams` porte bien `pivot_to_tip`,
-  `tilt_sign`, `b_sign`, `z_reference`, mais l'en-tête écrit (`gcode_export.py`) ne contient que
-  `; apex_sliced = 1` ; `GcodeReport.pivot_to_tip` n'est que dans le résultat JSON, pas dans le fichier.
-- Proposition (le moteur choisit) : lignes d'en-tête `; apex_kinematics pivot_to_tip=… b_sign=…
-  tilt_sign=… z_reference=…`, ou ces quatre valeurs dans le bloc `meta` de R-010. Les deux demandes
-  se traitent ensemble. Côté interface, ne plus lire `NOZZLE_PIVOT_MM` en dur : lire l'en-tête,
-  refuser un fichier qui n'en a pas (sauf marqueur d'ancienne version).
-- État : **faite côté moteur** (apex-engine@c66b57d4, 2026-10-27) : ligne en clair `; apex_kinematics pivot_to_tip=46
-  b_sign=1 tilt_sign=1 z_reference=tip` après `; apex_sliced = 1` (`kinematics_header_line` / `parse_kinematics_header`
-  dans `file_io/gcode_export.py`) et mêmes valeurs dans `meta.kinematics` du bloc chiffré (R-010). **Reste côté
-  interface (apex-ui)** : lire cette ligne (ou `meta.kinematics`) au lieu de `NOZZLE_PIVOT_MM = 46` ; refuser un
-  fichier qui n'en porte aucune, sauf marqueur d'ancienne version.
-
-### R-008 — Vecteurs de test de la cinématique
-- De : apex | À : apex-engine, puis apex-ui | Contrat : C4 | Ouverte : 2026-10-25
-- Besoin : le moteur publie des vecteurs (pointe + B d'Apex → X, Y, Z, B firmware et retour)
-  tirés de `machine_to_firmware` / `firmware_to_machine` ; l'interface les rejoue contre
-  `nozzleTip` (`gcodeParse.ts`) et le noyau `native/` (RULES §6).
-- Constat : la même formule existe trois fois, sans test commun.
-- Constat du 2026-10-27 : `tests/test_gcode_export.py` teste déjà `machine_to_firmware` /
-  `firmware_to_machine` (aller-retour), mais aucun fichier de vecteurs JSON n'est publié ; l'interface
-  n'a donc rien à rejouer. Besoin précisé : un fichier `tests/vectors/kinematics_vectors.json`
-  (pivot, `b_sign`, `tilt_sign`, `z_reference`, entrées, sorties, tolérance) généré par un script du
-  moteur avec `--check`, copié dans `apex` par `sync.sh`.
-- État : **faite côté moteur** (apex-engine@c66b57d4) : `tests/vectors/kinematics_vectors.json` (27 vecteurs, 3
-  configurations dont `b_sign=-1`, `z_reference=pivot`, Y déroulé, centre), généré par
-  `scripts/gen_kinematics_vectors.py --check`, rejoué par `tests/test_kinematics_vectors.py`. **Reste côté interface
-  (apex-ui)** : le copier (`sync.sh` le range sous `slicer-engine/tests/vectors/`) et rejouer ses vecteurs contre
-  `nozzleTip` (`gcodeParse.ts`) et le noyau `native/` (RULES §6).
-
-### R-010 — Le moteur écrit le bloc d'en-tête chiffré
-- De : apex-ui | À : apex-engine | Contrat : C5 | Ouverte : 2026-10-25
-- Besoin : le moteur écrit `sliced` et `meta` dans le bloc défini par
-  `apex-ui/docs/APEX_HEADER_FORMAT.md`, et passe `apex_cipher_vectors.json`.
-- Constat : le moteur n'écrit que le marqueur en clair `; apex_sliced = 1`.
-- Constat du 2026-10-27 : le moteur n'écrit toujours que `; apex_sliced = 1` (`gcode_export.py`) ;
-  aucun fichier du moteur ne référence `APEX_HEADER_FORMAT` ou `apex_cipher_vectors.json`.
-- Question ouverte pour le moteur (C++ à terme, R-014) : le chiffrement doit être implémenté en C++
-  dans l'exécutable ; l'interface publie les vecteurs, le moteur les rejoue en test.
-- État : **faite côté moteur** (apex-engine@c66b57d4) : `file_io/apex_header.py` écrit `sliced` + `meta` (générateur,
-  contrat, cinématique d'écriture, hauteur de couche, vitesses…) dans le bloc `apex_block_begin v1`, placé après
-  l'en-tête en clair. Les étages 1 à 6 sont **vérifiés contre `apex_cipher_vectors.json`** de l'interface
-  (copié par `scripts/sync_from_ui.py --check`), le fichier est reproductible (nonces dérivés du contenu). Réserves :
-  AES-GCM vient du paquet Python `cryptography` (sans lui le bloc n'est pas écrit, jamais une erreur) ; le port natif
-  se fait avec R-014. **Reste (contrôle RULES §7.4)** : déchiffrer un G-code produit par le moteur avec
-  `apexHeader.ts` ; l'interface conserve `sliced`/`meta` et ajoute son `journal`.
-
 ### R-012 — Monter `apex` : copie des deux dépôts et première release
 - De : apex | À : apex | Contrat : — | Ouverte : 2026-10-25
 - Fait :
@@ -164,6 +109,81 @@ Les demandes R-001 à R-011 viennent de l'inventaire du 2026-10-25 (`apex-engine
   (l'interface n'a pas de langues aujourd'hui) ; (2) **question à l'utilisateur** : TetraNet devient-il le mailleur par
   défaut ? `PipelineParams.mesher` vaut toujours `"tetgen"`, donc ce refus n'arrive jamais par défaut.
 
+### R-019 — Version de l'application à l'ordre du jour : `VERSIONS.md` en retard sur le moteur
+- De : apex-engine | À : apex | Contrat : — | Ouverte : 2026-10-27
+- Besoin : `VERSION` vaut `alpha-0.2.1.4.3.11.1.221` (2026-10-21, interface) ; le moteur a changé de
+  méthode de tranchage (voie unique de la chaleur, contrat 2, majeur) sans que la ligne existe dans
+  `VERSIONS.md` (RULES §9.1).
+- À faire (session moteur, à la prochaine montée de version) : un niveau **majeur** (« nouvelle
+  méthode de tranchage ») : `alpha-0.2.2.0.0.0.0.221` (majeur +1, niveaux à droite remis à zéro, Builds inchangé) ; `git pull` d'`apex` d'abord, message de
+  commit préfixé du numéro complet. **Question à l'utilisateur** : confirmer que le retrait FEM/Bird
+  est bien un niveau majeur et non moyen.
+- État : question à l'utilisateur. Le moteur a avancé le numéro à `alpha-0.2.2.0.2.0.0.221` (majeur +1 pour la voie
+  chaleur seule, puis deux « mineur » pour cette session : en-tête chiffré + tête de l'interface, puis progression réelle)
+  pour ne pas laisser `VERSION` en retard ; **à corriger si le retrait FEM/Bird n'est pas un niveau majeur**.
+
+## Fermées
+
+### R-007 — Longueur pivot-pointe portée par le G-code
+- De : apex-ui | À : apex-engine | Contrat : C4, C5 | Ouverte : 2026-10-25
+- Besoin : le G-code dit avec quelle longueur pivot-pointe, quel `b_sign`, quel `tilt_sign` et
+  quelle référence de Z il a été écrit, pour que l'aperçu et le noyau d'édition relisent la
+  pointe exactement.
+- Constat : l'interface suppose `NOZZLE_PIVOT_MM = 46` (`gcodeParse.ts`) ; le moteur rend cette
+  longueur réglable (`config/pivot_to_tip.json`, `GcodeParams.pivot_to_tip`). Un G-code exporté
+  avec une autre longueur serait mal relu, sans erreur.
+- Constat du 2026-10-27 (`apex-engine@11a5e798`) : inchangé. `GcodeParams` porte bien `pivot_to_tip`,
+  `tilt_sign`, `b_sign`, `z_reference`, mais l'en-tête écrit (`gcode_export.py`) ne contient que
+  `; apex_sliced = 1` ; `GcodeReport.pivot_to_tip` n'est que dans le résultat JSON, pas dans le fichier.
+- Proposition (le moteur choisit) : lignes d'en-tête `; apex_kinematics pivot_to_tip=… b_sign=…
+  tilt_sign=… z_reference=…`, ou ces quatre valeurs dans le bloc `meta` de R-010. Les deux demandes
+  se traitent ensemble. Côté interface, ne plus lire `NOZZLE_PIVOT_MM` en dur : lire l'en-tête,
+  refuser un fichier qui n'en a pas (sauf marqueur d'ancienne version).
+- État : **faite des deux côtés.** Moteur (apex-engine@c66b57d4, 2026-10-27) : ligne en clair `; apex_kinematics
+  pivot_to_tip=46 b_sign=1 tilt_sign=1 z_reference=tip` après `; apex_sliced = 1` et mêmes valeurs dans `meta.kinematics`
+  du bloc chiffré (R-010). Interface (apex-ui@3f0479f, 2026-10-28) : `src/utils/kinematics.ts` lit cette ligne ; la longueur lue
+  alimente l'aperçu (`nozzleTip`), le noyau d'édition (`pivotMm`) et l'épissage, plus aucune constante en dur. Une ligne
+  illisible, ou une configuration que l'aperçu ne sait pas représenter (`b_sign` ≠ 1, `tilt_sign` ≠ 1, `z_reference` ≠ `tip`),
+  fait **refuser** le fichier ; sans la ligne (G-code d'une ancienne version du moteur, ou de la conversion polaire de
+  l'interface) la longueur supposée est 46 mm, avec un avertissement pour un fichier du moteur. Vérifié dans l'application :
+  un tranchage de `death` porte la ligne, un en-tête à 40 mm est relu à 40, `b_sign=-1` est refusé. Limite : la conversion
+  polaire de l'interface n'écrit pas encore la ligne.
+
+### R-008 — Vecteurs de test de la cinématique
+- De : apex | À : apex-engine, puis apex-ui | Contrat : C4 | Ouverte : 2026-10-25
+- Besoin : le moteur publie des vecteurs (pointe + B d'Apex → X, Y, Z, B firmware et retour)
+  tirés de `machine_to_firmware` / `firmware_to_machine` ; l'interface les rejoue contre
+  `nozzleTip` (`gcodeParse.ts`) et le noyau `native/` (RULES §6).
+- Constat : la même formule existe trois fois, sans test commun.
+- Constat du 2026-10-27 : `tests/test_gcode_export.py` teste déjà `machine_to_firmware` /
+  `firmware_to_machine` (aller-retour), mais aucun fichier de vecteurs JSON n'est publié ; l'interface
+  n'a donc rien à rejouer. Besoin précisé : un fichier `tests/vectors/kinematics_vectors.json`
+  (pivot, `b_sign`, `tilt_sign`, `z_reference`, entrées, sorties, tolérance) généré par un script du
+  moteur avec `--check`, copié dans `apex` par `sync.sh`.
+- État : **faite des deux côtés.** Moteur (apex-engine@c66b57d4) : `tests/vectors/kinematics_vectors.json` (27 vecteurs,
+  3 configurations). Interface (apex-ui@3f0479f, 2026-10-28) : copie par `scripts/sync-engine-vectors.cjs` (`--check`) dans
+  `src/generated/` ; rejeu contre `nozzleTip` (`npm run test:kinematics` : 27 vecteurs, y compris `b_sign=-1` et
+  `z_reference=pivot`) et contre le noyau natif (`native/tests/test_kinematics_vectors.cpp`, `node native/build.cjs --test` :
+  les 9 vecteurs de la configuration que le noyau représente ; les 18 autres sont refusés au chargement, voir R-007).
+  0 écart à 1e-6 mm.
+
+### R-010 — Le moteur écrit le bloc d'en-tête chiffré
+- De : apex-ui | À : apex-engine | Contrat : C5 | Ouverte : 2026-10-25
+- Besoin : le moteur écrit `sliced` et `meta` dans le bloc défini par
+  `apex-ui/docs/APEX_HEADER_FORMAT.md`, et passe `apex_cipher_vectors.json`.
+- Constat : le moteur n'écrit que le marqueur en clair `; apex_sliced = 1`.
+- Constat du 2026-10-27 : le moteur n'écrit toujours que `; apex_sliced = 1` (`gcode_export.py`) ;
+  aucun fichier du moteur ne référence `APEX_HEADER_FORMAT` ou `apex_cipher_vectors.json`.
+- Question ouverte pour le moteur (C++ à terme, R-014) : le chiffrement doit être implémenté en C++
+  dans l'exécutable ; l'interface publie les vecteurs, le moteur les rejoue en test.
+- État : **faite des deux côtés.** Moteur (apex-engine@c66b57d4) : `file_io/apex_header.py` écrit `sliced` + `meta`
+  (générateur, contrat, cinématique, hauteur de couche, vitesses…) dans le bloc `apex_block_begin v1` ; étages 1 à 6 vérifiés
+  contre `apex_cipher_vectors.json`. Contrôle RULES §7.4 fait par l'interface le 2026-10-28 : le bloc d'un G-code produit par
+  le moteur (death) est **déchiffré par `apexHeader.ts`** (`sliced: true`, `meta.kinematics` = 46 / 1 / 1 / tip, contrat 2).
+  **À savoir** : le paquet Python `cryptography` n'est dans aucun fichier de dépendances du moteur et n'était pas installé
+  dans son `.venv` : sans lui le bloc n'est tout simplement pas écrit, sans erreur (installé à la main pour ce contrôle). À
+  déclarer côté moteur tant que le moteur est en Python ; le port natif se fait avec R-014.
+
 ### R-017 — Progression réelle à l'intérieur de chaque étape
 - De : apex-ui | À : apex-engine | Contrat : C3 | Ouverte : 2026-10-27
 - Besoin : l'interface montre une barre par étape (11 barres, une par étape de `main.py steps`) ;
@@ -188,29 +208,12 @@ Les demandes R-001 à R-011 viennent de l'inventaire du 2026-10-25 (`apex-engine
   death @ 0,8, limite #82/#73) : étape 1 (TetGen, sous-processus : le worker peut journaliser ses
   phases, voir `APEX_TETGEN_LOG`), étape 4 (itérations du CG), étape 8, étape 9. Le noyau natif doit
   accepter un rappel appelé par lots (le GIL est libéré dans les points d'entrée).
-- État : **faite côté moteur** (apex-engine@83bf565c, 2026-10-27), à valider sur Windows. `core/progress.py` : fractions
-  croissantes dans ]0, 1[, au plus une par pas de 1 % et par 100 ms, jamais estimées. Boucles instrumentées : couches
-  (5, 5b), remplissage (6, natif par tranches de 32 couches ou plus), collision (9, natif par tranches de 5 000 points),
-  ajustement (10), écriture du G-code ; jalons réels pour l'étape 1 (lecture, réparation, maillage volumique), 4, 7, 8.
-  Vérifié avec le noyau natif compilé sur un poste Linux : polylignes de l'étape 6 et événements de l'étape 9
-  **identiques** à l'appel unique (l_shape), suites 399 (Python) et 506 (natif) passées. Sur un cube : 26 lignes pour
-  l'export, 5 à 7 par étape à jalons. **Restent indivisibles faute de rappel dans le noyau** : TetGen (~14 s sur death), le
-  CG de la méthode de la chaleur et la cinématique inverse native (une barre qui reste ~10 s sur une valeur est donc
-  normale à ces endroits ; ne rien animer). Interface : rien d'obligatoire. À fermer après un tranchage sur le build
-  Windows réel.
-
-### R-019 — Version de l'application à l'ordre du jour : `VERSIONS.md` en retard sur le moteur
-- De : apex-engine | À : apex | Contrat : — | Ouverte : 2026-10-27
-- Besoin : `VERSION` vaut `alpha-0.2.1.4.3.11.1.221` (2026-10-21, interface) ; le moteur a changé de
-  méthode de tranchage (voie unique de la chaleur, contrat 2, majeur) sans que la ligne existe dans
-  `VERSIONS.md` (RULES §9.1).
-- À faire (session moteur, à la prochaine montée de version) : un niveau **majeur** (« nouvelle
-  méthode de tranchage ») : `alpha-0.2.2.0.0.0.0.221` (majeur +1, niveaux à droite remis à zéro, Builds inchangé) ; `git pull` d'`apex` d'abord, message de
-  commit préfixé du numéro complet. **Question à l'utilisateur** : confirmer que le retrait FEM/Bird
-  est bien un niveau majeur et non moyen.
-- État : question à l'utilisateur. Le moteur a avancé le numéro à `alpha-0.2.2.0.2.0.0.221` (majeur +1 pour la voie
-  chaleur seule, puis deux « mineur » pour cette session : en-tête chiffré + tête de l'interface, puis progression réelle)
-  pour ne pas laisser `VERSION` en retard ; **à corriger si le retrait FEM/Bird n'est pas un niveau majeur**.
+- État : **faite des deux côtés.** Moteur (apex-engine@83bf565c, 2026-10-27) : `core/progress.py`, fractions croissantes
+  dans ]0, 1[, au plus une par pas de 1 % et par 100 ms, jamais estimées ; TetGen, CG de la chaleur et cinématique inverse
+  native restent indivisibles (jalons seulement). Interface (apex-ui@3f0479f) : la barre d'une étape ne recule jamais. **Validé sur
+  Windows réel** (2026-10-28, `death`, noyau natif, depuis l'application) : valeurs distinctes vues par étape — ingest 5,
+  overhang 2, segmentation 2, field 4, layers 10, toolpath2d 5, scheduling 2, machine_toolpath 5, collision 13,
+  adjustment 9, export 4 ; chaque étape finit à 1,00.
 
 ### R-020 — Lier le modèle de tête au profil d'imprimante, côté moteur
 - De : utilisateur (note sur R-009) | À : apex-engine | Contrat : C6, C7 | Ouverte : 2026-10-27
@@ -220,13 +223,9 @@ Les demandes R-001 à R-011 viennent de l'inventaire du 2026-10-25 (`apex-engine
   de tranchage (`machine_profile` envoyé par l'interface, R-006) ne dit pas quelle tête. Le chemin du
   fichier ne doit pas traverser le contrat (machine de l'utilisateur ≠ machine du moteur) : proposition,
   un identifiant de modèle (`aetheris-4`) que le moteur résout dans ses `res/3d/toolheads/<id>/`.
-- État : **faite côté moteur** (apex-engine@c66b57d4) : `MachineProfile.toolhead_id` (défaut `"aetheris-4"`, dans le
-  schéma, ajout compatible), `load_toolhead_by_id` (seuls lettres, chiffres, `-` et `_` : jamais un chemin),
-  `main.ensure_toolhead` pour les profils venus d'une requête. **Reste côté interface** : envoyer `toolhead_id` dans
-  le `machine_profile` de la requête, tiré de `apex.toolhead_model` du profil d'imprimante ; un identifiant inconnu donne
-  `nozzle_model_checked=false` à l'étape 9 (journal), pas une erreur.
-
-## Fermées
+- État : **faite des deux côtés.** Moteur (apex-engine@c66b57d4) : `MachineProfile.toolhead_id`, `load_toolhead_by_id`.
+  Interface (apex-ui@3f0479f, 2026-10-28) : `machine_profile.toolhead_id` est envoyé dans chaque requête, tiré de `apex.toolhead_model`
+  du profil d'imprimante (schéma resynchronisé) ; tranchage de `death` vérifié.
 
 ### R-021 — Échantillonnage de la tête de collision (tête v4 de l'interface)
 - De : apex-engine | À : utilisateur | Contrat : C6 | Ouverte : 2026-10-27
