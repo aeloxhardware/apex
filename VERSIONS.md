@@ -7,6 +7,7 @@ Format et règles : [`integration/RULES.md`](integration/RULES.md), §9.
 Une ligne par version, la plus récente en haut :
 `<version> — <date> — <dépôt> @ <commit> — <ce qui change>`
 
+- `alpha-0.2.3.0.3.5.0.221` — 2026-10-29 — apex-engine @ a237fc12 — logos des Elements : coins arrondis (style Apex), Aequor = couches courbes sur un socle plan.
 - `alpha-0.2.3.0.3.4.0.221` — 2026-10-29 — apex-engine @ 873cf230 — logos des quatre Elements redessinés dans le style du logo Apex.
 - `alpha-0.2.3.0.3.3.0.221` — 2026-10-29 — apex-engine @ e38b7e5a — un dossier `element-xxxx/` par algorithme de tranchage (`element-ardor` = ancien `pipeline/`, `element-aeolis` = ancien `nonplanar/`, `element-aequor` et `element-arva` à venir), alias d'import `pipeline` et `nonplanar` conservés ; logos SVG des quatre Elements.
 - `alpha-0.2.3.0.3.2.0.221` — 2026-10-29 — apex-engine @ 22829213 — famille de noms « Element » : Element Aeolis (non planaire), Element Aequor (hybride, à venir), Element Arva (planaire, à venir) ; `meta.algorithm_name` = `Element Aeolis`.
