@@ -7,6 +7,7 @@ Format et règles : [`integration/RULES.md`](integration/RULES.md), §9.
 Une ligne par version, la plus récente en haut :
 `<version> — <date> — <dépôt> @ <commit> — <ce qui change>`
 
+- `alpha-0.2.3.0.1.0.0.221` — 2026-10-29 — apex-engine @ 94d6ec43 — tranchage non planaire : contrôle de collision de la vraie tête (enveloppe inférieure, rapport `head` et ligne `; head_collisions` dans le G-code).
 - `alpha-0.2.3.0.0.0.0.221` — 2026-10-29 — apex-engine @ 720754f1 — second algorithme de tranchage : non planaire « surface en hauteur » (`nonplanar/`, v0, non exposé dans le contrat, R-024) ; plancher et plafond d'épaisseur de couche du profil (0,1 et 0,25 mm par défaut) et inter-couches locales activées par défaut.
 - `alpha-0.2.2.0.3.0.0.221` — 2026-10-28 — apex-engine @ 4389a561 — lissage non-planaire sur la voie chaleur (`params.skin`, opt-in, désactivé par défaut) : zones accessibles, creusement du corps, trajectoires de surface, ordre et collisions ; mesuré de bout en bout sur l-triple, Benchy et death (turkish en cours).
 - `alpha-0.2.2.0.2.1.0.221` — 2026-10-28 — apex-engine @ 62b4698b — étape 1 scindée en « import » et « tetrahedralization » (R-022, contrat C3, ajout compatible).
