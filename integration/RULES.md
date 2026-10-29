@@ -13,7 +13,7 @@ contient aussi l'inventaire des écarts constatés le 2026-10-25.
 
 | Dépôt | Rôle | Ce qu'on y développe |
 |---|---|---|
-| `apex-engine` | **le moteur** | Python (`pipeline/`, `core/`, `file_io/`, `main.py`) et noyau C++ (`cpp/`). Tranchage, export G-code, paramètres. |
+| `apex-engine` | **le moteur** | Python (`element-ardor/` [alias d'import `pipeline`], `element-aeolis/` [alias `nonplanar`], `core/`, `file_io/`, `main.py`) et noyau C++ (`cpp/`). Tranchage, export G-code, paramètres. |
 | `apex-ui` | **l'expérience utilisateur** | React, Babylon.js, Electron, noyau natif d'édition (`native/`). |
 | `apex` | **l'application complète** | Rien de nouveau : il combine le moteur et l'interface à des commits épinglés, les contrôle ensemble et publie les releases. Il porte aussi ces règles et le tableau des demandes. |
 
