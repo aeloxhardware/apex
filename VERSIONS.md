@@ -7,6 +7,7 @@ Format et règles : [`integration/RULES.md`](integration/RULES.md), §9.
 Une ligne par version, la plus récente en haut :
 `<version> — <date> — <dépôt> @ <commit> — <ce qui change>`
 
+- `alpha-0.2.3.0.2.1.0.221` — 2026-10-29 — apex-engine @ ddfc53ab — format `apex-kinematics/1` : `part_origin`, règle de rotation unique, validation, exemple CoreXY à plateau inclinable.
 - `alpha-0.2.3.0.2.0.0.221` — 2026-10-29 — apex-engine @ 02049a64 — G-code : les six axes XYZABC sur chaque mouvement (tous les tranchages) et description de la cinématique en tête (`apex-kinematics/1`, R-025).
 - `alpha-0.2.3.0.1.0.0.221` — 2026-10-29 — apex-engine @ 94d6ec43 — tranchage non planaire : contrôle de collision de la vraie tête (enveloppe inférieure, rapport `head` et ligne `; head_collisions` dans le G-code).
 - `alpha-0.2.3.0.0.0.0.221` — 2026-10-29 — apex-engine @ 720754f1 — second algorithme de tranchage : non planaire « surface en hauteur » (`nonplanar/`, v0, non exposé dans le contrat, R-024) ; plancher et plafond d'épaisseur de couche du profil (0,1 et 0,25 mm par défaut) et inter-couches locales activées par défaut.
