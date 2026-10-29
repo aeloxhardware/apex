@@ -214,7 +214,11 @@ Les demandes R-001 à R-011 viennent de l'inventaire du 2026-10-25 (`apex-engine
   `meta.kinematics_description` dans le bloc des DEUX transcripteurs (le non planaire n'en écrivait pas). À faire côté
   interface : lire le bloc AVANT de classer le fichier (aujourd'hui `readApexHeader` s'exécute après `parseGCode`,
   `use-gcode-preview.ts`) et passer `machine` au parseur, qui ne devine d'après les mots B / C que sans bloc.
-- État : ouverte (moteur fait ; interface : lecture du bloc avant le classement)
+- **Signature en clair (2026-10-29)** : la première ligne de tout G-code du moteur est `; 85Ejj-sV6dI-NXTGl-JiodA-0b8aZ`
+  (sans signification, `file_io/apex_signature.py`) ; elle dit « fichier Apex », l'interface lit alors le bloc chiffré
+  (`meta.apex_version`, `machine`, `kinematics_description`, …). Prompt complet pour la session interface :
+  `integration/PROMPT_UX_reconnaitre_apex.md` ; exemples : `python scripts/gen_header_samples.py <dossier>` (moteur).
+- État : ouverte (moteur fait ; interface : signature, lecture du bloc avant le classement)
 
 ## Fermées
 
