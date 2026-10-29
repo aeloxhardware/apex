@@ -187,6 +187,19 @@ Les demandes R-001 à R-011 viennent de l'inventaire du 2026-10-25 (`apex-engine
   une surface en hauteur) quand l'utilisateur décide de l'exposer, avec entrée dans `CONTRACT_CHANGES.md`.
 - État : ouverte (moteur v0 poussé, non exposé).
 
+### R-025 — G-code : six axes XYZABC sur chaque mouvement et description de la cinématique en tête
+- De : apex-engine | À : apex-ui | Contrat : C4, C5 | Ouverte : 2026-10-29
+- Besoin (décision de l'utilisateur, 2026-10-29) : pour tous les algorithmes de tranchage, chaque mouvement du G-code porte
+  une coordonnée pour les six axes `X Y Z A B C`, même si certains restent toujours à 0 ; et le début du fichier décrit
+  la cinématique de la machine dans un format que tout lecteur peut relire.
+- Constat (apex-engine) : fait côté moteur, `G00 X.. Y.. Z.. A0 B.. C0 [E..] F..` ; en tête, `; kinematics ...` (résumé) et
+  `; apex_kinematics_json {...}` (format `apex-kinematics/1`, `file_io/kinematics_description.py` : chaîne série de
+  liaisons côté pièces / côté outil, un axe par lettre, `unused` pour A et C). Détail : `CONTRACT_CHANGES.md`.
+- À faire : interface — vérifier que l'aperçu et le noyau d'édition lisent ces lignes (mots A et C ignorés ou lus), et
+  envisager de piloter l'aperçu depuis la description plutôt que depuis des constantes (`pivot_to_tip`, sens de B) ;
+  dire si un lecteur à expression régulière stricte existe côté interface.
+- État : ouverte (moteur fait, interface non vérifiée).
+
 ## Fermées
 
 ### R-007 — Longueur pivot-pointe portée par le G-code
