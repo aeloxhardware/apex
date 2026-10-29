@@ -7,6 +7,7 @@ Format et règles : [`integration/RULES.md`](integration/RULES.md), §9.
 Une ligne par version, la plus récente en haut :
 `<version> — <date> — <dépôt> @ <commit> — <ce qui change>`
 
+- `alpha-0.2.3.0.2.2.0.221` — 2026-10-29 — apex-engine @ 96ef099f — bloc d'en-tête chiffré : `meta.machine` et `meta.kinematics_description` pour les deux transcripteurs (R-025).
 - `alpha-0.2.3.0.2.1.1.221` — 2026-10-29 — apex-engine @ 7d319926 — tranchage non planaire : plus d'anneaux de parois aux frontières internes des couches (parois sur le seul contour de la pièce), angle du dessus uniforme.
 - `alpha-0.2.3.0.2.1.0.221` — 2026-10-29 — apex-engine @ ddfc53ab — format `apex-kinematics/1` : `part_origin`, règle de rotation unique, validation, exemple CoreXY à plateau inclinable.
 - `alpha-0.2.3.0.2.0.0.221` — 2026-10-29 — apex-engine @ 02049a64 — G-code : les six axes XYZABC sur chaque mouvement (tous les tranchages) et description de la cinématique en tête (`apex-kinematics/1`, R-025).

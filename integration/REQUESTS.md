@@ -209,7 +209,12 @@ Les demandes R-001 à R-011 viennent de l'inventaire du 2026-10-25 (`apex-engine
   ignorés) ; garder les heuristiques actuelles seulement quand l'en-tête est absent. Un mot `A`, `B` ou `C` à 0 d'un axe
   `unused` ne doit jamais classer le fichier. Test de recette : `plate_6_apex_nonplanar.gcode` (B lu 0°) et un G-code polaire
   d'Apex (lu polaire).
-- État : ouverte (moteur fait ; interface : défaut ci-dessus à corriger).
+- **Solution retenue par l'utilisateur (2026-10-29)** : l'en-tête chiffré Apex (R-010, format v1, déjà lu par l'interface)
+  porte le type de machine. Le moteur écrit maintenant `meta.machine` (`cartesian` | `apex-polar-4axis`) et
+  `meta.kinematics_description` dans le bloc des DEUX transcripteurs (le non planaire n'en écrivait pas). À faire côté
+  interface : lire le bloc AVANT de classer le fichier (aujourd'hui `readApexHeader` s'exécute après `parseGCode`,
+  `use-gcode-preview.ts`) et passer `machine` au parseur, qui ne devine d'après les mots B / C que sans bloc.
+- État : ouverte (moteur fait ; interface : lecture du bloc avant le classement)
 
 ## Fermées
 
