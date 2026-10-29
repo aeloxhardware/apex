@@ -7,6 +7,7 @@ Format et règles : [`integration/RULES.md`](integration/RULES.md), §9.
 Une ligne par version, la plus récente en haut :
 `<version> — <date> — <dépôt> @ <commit> — <ce qui change>`
 
+- `alpha-0.2.3.0.3.2.0.221` — 2026-10-29 — apex-engine @ 22829213 — famille de noms « Element » : Element Aeolis (non planaire), Element Aequor (hybride, à venir), Element Arva (planaire, à venir) ; `meta.algorithm_name` = `Element Aeolis`.
 - `alpha-0.2.3.0.3.1.0.221` — 2026-10-29 — apex-engine @ bf929456 — le second algorithme de tranchage (non planaire, surface en hauteur) s'appelle **Aeolis** : `meta.algorithm_name`, `generator` = `Apex engine (Aeolis)`.
 - `alpha-0.2.3.0.3.0.0.221` — 2026-10-29 — apex-engine @ 20d8c28c — signature Apex en première ligne des G-code (polaire et non planaire) et `meta.apex_version` dans le bloc chiffré ; prompt de la session interface (`integration/PROMPT_UX_reconnaitre_apex.md`, R-025).
 - `alpha-0.2.3.0.2.2.0.221` — 2026-10-29 — apex-engine @ 96ef099f — bloc d'en-tête chiffré : `meta.machine` et `meta.kinematics_description` pour les deux transcripteurs (R-025).
