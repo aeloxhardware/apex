@@ -49,12 +49,12 @@ tolérer des champs inconnus) :
 
 | Champ | Type | Sens |
 |---|---|---|
-| `generator` | texte | `"Apex engine"` (polaire) ou `"Apex engine (nonplanar)"` |
+| `generator` | texte | `"Apex engine"` (polaire) ou `"Apex engine (Aeolis)"` (algorithme non planaire, nom choisi le 2026-10-29) |
 | `apex_version` | texte | version de l'application, ex. `alpha-0.2.3.0.3.0.0.221` (`unknown` si le moteur ne la connaît pas) |
 | `contract` | entier | numéro de contrat moteur ↔ interface (aujourd'hui 2) |
 | `machine` | texte | `"cartesian"` ou `"apex-polar-4axis"` ; **c'est la clé de classement** |
 | `kinematics_description` | objet | description `apex-kinematics/1` : axes `X Y Z A B C`, type (`linear`, `rotary`, `unused`), côté (`tool`, `bed`), vecteur, plage, sens positif, décalage outil, `part_origin`, conventions. Spécification : `apex-engine/file_io/kinematics_description.py` |
-| `algorithm` | texte | non planaire seulement : `"nonplanar-heightfield/1"` |
+| `algorithm`, `algorithm_name` | texte | non planaire seulement : `"nonplanar-heightfield/1"` et `"Aeolis"` (nom à afficher) |
 | `min_layer_height`, `max_layer_height`, `intermediate_layers` | nombres, booléen | non planaire : bornes d'épaisseur de couche du profil et option d'inter-couches |
 | `kinematics` | objet | polaire : `pivot_to_tip`, `b_sign`, `tilt_sign`, `z_reference` |
 | `layer_height`, `line_width`, `print_speed`, `travel_speed`, `nozzle_temp` | nombres | polaire : réglages d'écriture |
