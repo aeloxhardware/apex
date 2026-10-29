@@ -172,6 +172,21 @@ Les demandes R-001 à R-011 viennent de l'inventaire du 2026-10-25 (`apex-engine
      voyage avec le schéma (alors l'interface cesse de les recopier).
 - État : ouverte.
 
+### R-024 — Second algorithme : tranchage non planaire « surface en hauteur » ; hauteurs de couche du profil
+- De : apex-engine | À : apex-ui | Contrat : C1, C2 | Ouverte : 2026-10-29
+- Besoin (décision de l'utilisateur, 2026-10-29) : le moteur a un second algorithme, indépendant du pipeline 5 axes
+  (`nonplanar/`, buse verticale, couches `z = S_k(x,y)` sur les surfaces en hauteur, v0). **Le plancher et le plafond
+  d'épaisseur de couche sont définis par le profil de l'imprimante, donc par l'interface** ; défauts 0,1 et 0,25 mm.
+  L'option « inter-couches » (couches locales là où l'espacement dépasse le plafond) est activée par défaut.
+- Constat (apex-engine, `nonplanar/`) : `SliceParams.min_layer_height` / `max_layer_height` (mm),
+  `layer_height` (nominal, facultatif), `first_layer_height`, `intermediate_layers` (booléen). Entrée : un maillage qui est une
+  surface en hauteur (sinon `NotAHeightfieldError`). Pas encore branché dans `main.py`, dans `main.py steps` ni dans le
+  schéma : le contrat n'a pas changé.
+- À faire : interface — champs plancher/plafond dans le profil d'imprimante et choix du mode de tranchage ; moteur —
+  brancher le mode dans `main.py slice` (champ de requête, étapes de progression, refus code 3 pour un maillage qui n'est pas
+  une surface en hauteur) quand l'utilisateur décide de l'exposer, avec entrée dans `CONTRACT_CHANGES.md`.
+- État : ouverte (moteur v0 poussé, non exposé).
+
 ## Fermées
 
 ### R-007 — Longueur pivot-pointe portée par le G-code
