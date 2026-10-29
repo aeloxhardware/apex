@@ -218,7 +218,10 @@ Les demandes R-001 à R-011 viennent de l'inventaire du 2026-10-25 (`apex-engine
   (sans signification, `file_io/apex_signature.py`) ; elle dit « fichier Apex », l'interface lit alors le bloc chiffré
   (`meta.apex_version`, `machine`, `kinematics_description`, …). Prompt complet pour la session interface :
   `integration/PROMPT_UX_reconnaitre_apex.md` ; exemples : `python scripts/gen_header_samples.py <dossier>` (moteur).
-- État : ouverte (moteur fait ; interface : signature, lecture du bloc avant le classement)
+- **Affichage (2026-10-29)** : quand la signature est là, le panneau doit dire « Généré par Apex Slicer V… » (numéro lu dans
+  `meta.apex_version`) et non « Généré le plus probablement par ». Prompt :
+  `integration/PROMPT_UX_affichage_genere_par_apex.md`.
+- État : ouverte (moteur fait ; interface : signature, lecture du bloc avant le classement, affichage de la version)
 
 ## Fermées
 
