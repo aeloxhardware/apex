@@ -198,7 +198,18 @@ Les demandes R-001 à R-011 viennent de l'inventaire du 2026-10-25 (`apex-engine
 - À faire : interface — vérifier que l'aperçu et le noyau d'édition lisent ces lignes (mots A et C ignorés ou lus), et
   envisager de piloter l'aperçu depuis la description plutôt que depuis des constantes (`pivot_to_tip`, sens de B) ;
   dire si un lecteur à expression régulière stricte existe côté interface.
-- État : ouverte (moteur fait, interface non vérifiée).
+- **Défaut constaté le 2026-10-29 (bloquant pour l'aperçu)** : l'aperçu lit désormais B = 90° partout sur les G-code du
+  tranchage non planaire (le moteur écrit B0.000, vérifié sur 189 212 mouvements). Cause, dans la copie de l'interface
+  (`slicer-ux/src/components/gcodeParse.ts`, lignes 409-410 et 662-663) : tout fichier qui porte un mot `C` est classé
+  « multi-axes à orientation d'outil » (variante Unlayered Slicer), où `B = -90` est l'outil vertical et l'inclinaison vaut
+  `B + 90`. Avec `C0` écrit à chaque mouvement, B = 0 devient 90°. **Même risque pour le G-code polaire d'Apex**, qui
+  porte aussi `C0` : `polar` n'est reconnu qu'à un mot B SANS mot C, donc ces fichiers seraient lus en cartésien.
+- À faire côté interface (ne pas déduire la machine de la présence d'un mot) : lire `; apex_kinematics_json {...}`
+  d'abord (`machine` = `cartesian` -> cartésien, A/B/C inutilisés ; `apex-polar-4axis` -> polaire ; axes `type: "unused"`
+  ignorés) ; garder les heuristiques actuelles seulement quand l'en-tête est absent. Un mot `A`, `B` ou `C` à 0 d'un axe
+  `unused` ne doit jamais classer le fichier. Test de recette : `plate_6_apex_nonplanar.gcode` (B lu 0°) et un G-code polaire
+  d'Apex (lu polaire).
+- État : ouverte (moteur fait ; interface : défaut ci-dessus à corriger).
 
 ## Fermées
 
