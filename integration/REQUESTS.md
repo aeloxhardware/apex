@@ -172,6 +172,41 @@ Les demandes R-001 à R-011 viennent de l'inventaire du 2026-10-25 (`apex-engine
      voyage avec le schéma (alors l'interface cesse de les recopier).
 - État : ouverte.
 
+### R-026 — Étapes de progression propres à chaque algorithme (Element Aeolis : 6 étapes, pas 11)
+- De : apex-engine | À : apex-ui | Contrat : C3 | Ouverte : 2026-10-30
+- Besoin (utilisateur, 2026-10-30, capture de la fenêtre « Découpe des modèles en cours ») : la fenêtre affiche toujours les
+  11 étapes du pipeline principal (Element Ardor : « Tétraédralisation du maillage triangulé », « Détection des surplombs »,
+  « Segmentation en régions », « Calcul du champ de couches », « Extraction des couches courbes »…, « Ajustement des
+  collisions »). **Aucune ne décrit ce que fait Element Aeolis** (pas de tétraèdres, de surplombs, de champ ni d'ajustement).
+  La fenêtre doit afficher les étapes de l'algorithme choisi, lues dans le moteur.
+- Constat (apex-engine@b8aee165) : `python main.py steps --algorithm element-aeolis` publie 6 étapes (la réponse porte
+  `algorithm` ; sans option : `element-ardor`, liste inchangée) :
+
+  | identifiant | libellé affiché (à ajouter dans `src/utils/sliceStepLabels.ts`) | ce que fait l'étape |
+  |---|---|---|
+  | `import` | Import (existe) | lecture du STL, pose sur le plateau |
+  | `heightfield` | Modèle de surface en hauteur | dessous et dessus rastérisés, empreinte, contrôle « surface en hauteur » |
+  | `layer_surfaces` | Surfaces des couches | épaisseurs entre plancher et plafond, inter-couches, ordre de dépôt |
+  | `toolpath2d` | Parois et remplissage (existe) | parois et zigzag de chaque couche |
+  | `collision` | Simulation de collision (existe) | tête réelle contre la matière déjà déposée |
+  | `export` | Écriture du G-code (existe) | écriture du fichier |
+
+  Remplacements par rapport à la capture : « Tétraédralisation », « Détection des surplombs », « Segmentation »,
+  « Calcul du champ », « Extraction des couches courbes », « Ordonnancement », « Trajectoire machine » et « Ajustement des
+  collisions » disparaissent (Aeolis n'a pas d'équivalent) ; « Modèle de surface en hauteur » et « Surfaces des couches »
+  apparaissent. Les identifiants `layers` et `collision` d'Ardor ne sont PAS repris tels quels pour les surfaces (d'où
+  `layer_surfaces`).
+- Progression : chaque étape d'Aeolis s'ouvre à 0, finit à 1, et émet des fractions croissantes mesurées sur le travail fait
+  (triangles rastérisés, couches remplies, points testés, points écrits), jamais un saut de 0 à 1 après une longue attente
+  ni une minuterie. **Limite restante, côté Ardor** : « Tétraédralisation » (TetGen, ~10 s sur un modèle dense) est
+  indivisible côté moteur ; sa barre ne peut avancer que par jalons.
+- À faire : interface — (1) appeler `steps --algorithm <algorithme>` au lieu de `steps` quand le mode de tranchage est
+  choisi ; (2) ajouter les deux libellés ci-dessus ; (3) ne pas afficher une étape que l'algorithme ne publie pas.
+  Moteur — brancher `main.py slice` pour Aeolis (champ `algorithm` de la requête, refus code 3 si le maillage n'est pas une
+  surface en hauteur) : reste dans R-024, **pas fait** ; tant que ce n'est pas branché, l'interface ne peut pas lancer Aeolis,
+  seulement lister ses étapes.
+- État : ouverte (moteur : étapes publiées et progression réelle faites ; interface : à faire).
+
 ### R-024 — Second algorithme : tranchage non planaire « surface en hauteur » ; hauteurs de couche du profil
 - De : apex-engine | À : apex-ui | Contrat : C1, C2 | Ouverte : 2026-10-29
 - Besoin (décision de l'utilisateur, 2026-10-29) : le moteur a un second algorithme, indépendant du pipeline 5 axes
