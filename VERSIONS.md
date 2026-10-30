@@ -7,6 +7,7 @@ Format et règles : [`integration/RULES.md`](integration/RULES.md), §9.
 Une ligne par version, la plus récente en haut :
 `<version> — <date> — <dépôt> @ <commit> — <ce qui change>`
 
+- `alpha-0.2.3.0.5.0.0.221` — 2026-10-30 — apex-engine @ 712ca806 — `main.py slice` appelle Element Aeolis (champ `algorithm`, racine `AeolisSliceParams` du schéma, refus `not_a_heightfield`) ; moteur de R-024 fait.
 - `alpha-0.2.3.0.4.0.0.221` — 2026-10-30 — apex-engine @ b8aee165 — Element Aeolis : progression réelle par étape (6 étapes, `steps --algorithm element-aeolis`) et tranchage 3 à 5 fois plus rapide (R-026).
 - `alpha-0.2.3.0.3.5.0.221` — 2026-10-29 — apex-engine @ a237fc12 — logos des Elements : coins arrondis (style Apex), Aequor = couches courbes sur un socle plan.
 - `alpha-0.2.3.0.3.4.0.221` — 2026-10-29 — apex-engine @ 873cf230 — logos des quatre Elements redessinés dans le style du logo Apex.

@@ -202,9 +202,8 @@ Les demandes R-001 à R-011 viennent de l'inventaire du 2026-10-25 (`apex-engine
   indivisible côté moteur ; sa barre ne peut avancer que par jalons.
 - À faire : interface — (1) appeler `steps --algorithm <algorithme>` au lieu de `steps` quand le mode de tranchage est
   choisi ; (2) ajouter les deux libellés ci-dessus ; (3) ne pas afficher une étape que l'algorithme ne publie pas.
-  Moteur — brancher `main.py slice` pour Aeolis (champ `algorithm` de la requête, refus code 3 si le maillage n'est pas une
-  surface en hauteur) : reste dans R-024, **pas fait** ; tant que ce n'est pas branché, l'interface ne peut pas lancer Aeolis,
-  seulement lister ses étapes.
+  Moteur — `main.py slice` appelle Aeolis (champ `algorithm`, refus code 3 `not_a_heightfield`) : **fait** (R-024,
+  apex-engine@712ca806).
 - État : ouverte (moteur : étapes publiées et progression réelle faites ; interface : à faire).
 
 ### R-024 — Second algorithme : tranchage non planaire « surface en hauteur » ; hauteurs de couche du profil
@@ -220,7 +219,18 @@ Les demandes R-001 à R-011 viennent de l'inventaire du 2026-10-25 (`apex-engine
 - À faire : interface — champs plancher/plafond dans le profil d'imprimante et choix du mode de tranchage ; moteur —
   brancher le mode dans `main.py slice` (champ de requête, étapes de progression, refus code 3 pour un maillage qui n'est pas
   une surface en hauteur) quand l'utilisateur décide de l'exposer, avec entrée dans `CONTRACT_CHANGES.md`.
-- État : ouverte (moteur v0 poussé, non exposé).
+- **Moteur : fait le 2026-10-30** (apex-engine@712ca806, sur `main`) : `main.py slice --request` accepte le champ facultatif
+  `algorithm` (`element-ardor` par défaut, `element-aeolis`) ; avec Aeolis, `params` est un `AeolisSliceParams` (nouvelle racine
+  du schéma C1, à recopier par `sync-engine-schema`) et `gcode_params` est refusé (code 2) ; un maillage qui n'est pas une
+  surface en hauteur donne le statut `not_a_heightfield` (code 3, `message` lisible) ; même objet résultat qu'Ardor (`gcode`,
+  `report`, `warnings`) plus `algorithm`, `layers`, `collisions_detected`, `placement_offset_z` ; avertissement `head_collisions`.
+  Étapes : `main.py steps --algorithm element-aeolis` (R-026). Détail : `CONTRACT_CHANGES.md` (ajouts du 2026-10-30).
+- À faire côté interface : champ `algorithm` dans la requête selon le mode choisi, plancher/plafond de couche du profil dans
+  `params.min_layer_height` / `max_layer_height`, option `intermediate_layers`, affichage du refus `not_a_heightfield` et de
+  l'avertissement `head_collisions`. Le moteur n'a pas appliqué `center_xy` ni la position des modèles du plateau : Aeolis
+  tranche UN modèle (`place_on_bed` le pose à z = 0).
+- État : moteur fait, interface à faire.
+
 
 ### R-025 — G-code : six axes XYZABC sur chaque mouvement et description de la cinématique en tête
 - De : apex-engine | À : apex-ui | Contrat : C4, C5 | Ouverte : 2026-10-29
