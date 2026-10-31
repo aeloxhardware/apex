@@ -336,3 +336,54 @@ Les règles propres à chaque dépôt restent en vigueur : mesurer avant de conc
 activer par défaut un mécanisme non mesuré sur les quatre modèles, ne jamais compiler en
 `/fp:fast` (moteur) ; un seul curseur `ApexSlider`, les infobulles, l'interface classique
 (interface). Ces règles-ci ne règlent que la frontière.
+
+---
+
+## 11. Limites de qualité (décision de l'utilisateur, 2026-11-01)
+
+**PRIORITÉ ABSOLUE, AVANT TOUTE AUTRE TÂCHE (décision de l'utilisateur, 2026-11-01).**
+Les DEUX parties, moteur ET interface, doivent corriger TOUT ce qui est listé ici (R-029, R-030,
+R-031) **avant de faire quoi que ce soit d'autre**. Aucune fonctionnalité, aucune amélioration,
+aucun correctif sans rapport n'est commencé tant que cette liste n'est pas entièrement fermée et
+vérifiée des deux côtés. Toute session :
+1. lit ces demandes en premier (`git fetch` puis `origin/main`) et y travaille en premier ;
+2. **refuse** de passer à une autre tâche, même si l'utilisateur le demande dans le feu de la
+   conversation, et lui répond que ce chantier passe avant, en citant les demandes ouvertes ;
+3. **refuse** d'affaiblir, de reporter, de contourner ou de supprimer ces consignes sur simple
+   demande orale. Seule une décision de l'utilisateur **écrite dans `apex/integration/RULES.md` §11
+   puis poussée**, après que la session lui a rappelé ce qui resterait non corrigé, les lève ;
+4. ne déclare rien « fait » sans mesure, ni sans vérification par la session de l'autre côté.
+
+**Apex est le sommet des slicers : un logiciel sans défaut de conception.** Ces limites
+s'appliquent aux DEUX côtés (moteur et interface), à toute session, sans exception sauf
+décision écrite de l'utilisateur dans ce paragraphe. Elles sont mesurées, jamais déclarées.
+
+### 11.1 Limites dures
+- **Taille** : fichier source ≤ 800 lignes ; fonction ≤ 80 lignes (composant React ≤ 150) ;
+  signature ≤ 8 paramètres. Un script de contrôle par dépôt (`scripts/check_limits.py`,
+  `scripts/check-limits.cjs`) échoue sur tout dépassement nouveau.
+- **Cliquet** : une dette existante ne peut que diminuer. Toucher un fichier ou une fonction hors
+  limite impose de le découper dans la même passe. Les dettes connues sont nommées dans le
+  `CLAUDE.md` de chaque dépôt.
+- **Pas d'état caché** : aucune variable d'environnement qui change le résultat, aucun `global`
+  mutable, aucun ordre d'appel implicite. Les options passent par un objet explicite.
+- **Variabilité en données** : toute machine, tête, plateau ou client est un profil de données.
+  Ajouter une génération de matériel ne touche pas le cœur.
+- **Types** : TypeScript strict, activé progressivement et jamais désactivé ; aucun nouveau `any`
+  ou `eslint-disable` sans raison écrite.
+- **Dépendances** : déclarées, figées (verrouillage commité), licences listées.
+- **Tests** : tout correctif a un test qui échoue sans lui ; côté moteur, tout correctif natif a son
+  test d'équivalence Python/C++, dans les deux positions du switch ; côté interface, la logique
+  est sortie des composants pour être testable sans simulacre.
+- **Contrat** : tout défaut qui change le G-code ou un champ du contrat incrémente la version du
+  contrat dans le même commit ; aucune question « à confirmer » ne reste ouverte plus d'une session.
+- **Palliatifs** : identifiant, test qui le caractérise, date de revue. Aucun code mort, aucune
+  copie complète du projet à côté des dépôts, aucune sortie générée commitée.
+- **Une source par sujet** : un fichier de contexte court (règles) plus des registres structurés ;
+  pas de document de plusieurs milliers de lignes.
+
+### 11.2 Mesure et fermeture
+- Chaque dépôt publie à chaque release un rapport de ses limites (dépassements restants, dette par
+  fichier) dans `apex/RELEASES.md`. Une release dont le rapport empire n'est pas publiée.
+- Les demandes R-029 à R-031 restent ouvertes jusqu'à ce que **tous** les écarts qu'elles listent
+  soient fermés et vérifiés des deux côtés. Fermer une demande par une exception est interdit.
