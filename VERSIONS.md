@@ -7,6 +7,7 @@ Format et règles : [`integration/RULES.md`](integration/RULES.md), §9.
 Une ligne par version, la plus récente en haut :
 `<version> — <date> — <dépôt> @ <commit> — <ce qui change>`
 
+- `alpha-0.2.3.1.0.0.0.221` — 2026-10-31 — apex-engine @ 90dc7ed — machine Aetheris-4 Gen 1 (portique XYZ, A et B portées par la tête) : profil, compensation du pivot, export G-code `X Y Z A B`, polaire conservée. Ordre de montage, pivot, plages et signes à confirmer sur la machine. **Niveau « moyen » à confirmer par l'utilisateur.**
 - `alpha-0.2.3.0.6.1.0.221` — 2026-11-01 — apex-engine @ e8cb91ed — Element Aeolis écrit le type de chaque ligne (`;TYPE:WALL-OUTER`, `WALL-INNER`, `FILL`, `SKIN`) pour colorer l'aperçu (R-028).
 - `alpha-0.2.3.0.6.0.0.221` — 2026-10-31 — apex-engine @ 6f879069 — Element Aeolis tranche toute géométrie (moteur général par sections planaires déformées) ; réglages de buse « Angle de la buse » (10°) et « Longueur maximale atteignable par la buse » (2 mm), défauts très bas (R-027).
 - `alpha-0.2.3.0.5.0.0.221` — 2026-10-30 — apex-engine @ 712ca806 — `main.py slice` appelle Element Aeolis (champ `algorithm`, racine `AeolisSliceParams` du schéma, refus `not_a_heightfield`) ; moteur de R-024 fait.
