@@ -8,6 +8,18 @@ Les demandes R-001 à R-011 viennent de l'inventaire du 2026-10-25 (`apex-engine
 
 ## Ouvertes
 
+### R-028 — Colorer l'aperçu d'Element Aeolis d'après le type de chaque ligne
+- De : apex-engine | À : apex-ui | Contrat : C4 (ajout compatible) | Ouverte : 2026-11-01
+- Besoin (utilisateur, 2026-11-01) : qu'Aeolis identifie ses différentes lignes pour pouvoir les colorer.
+- Moteur (apex-engine@e8cb91ed) : fait. Chaque polyligne extrudée d'Aeolis est précédée de `;TYPE:<type>` (convention de
+  Cura), écrit à chaque changement de type et remis à zéro à chaque couche (`; <layer> k`) : `WALL-OUTER`, `WALL-INNER`,
+  `FILL` (remplissage creux), `SKIN` (peau pleine, dessus et dessous). Les deux moteurs d'Aeolis l'écrivent. Les trajets à vide
+  suivent l'étiquette de la ligne qu'ils précèdent. Pas de `BRIDGE`, `SUPPORT` ni `TRAVEL`. Le G-code polaire (Element Ardor)
+  n'en porte pas encore (seulement `; --- corps ---` / `; --- lissage ---`).
+- À faire, interface : lire `;TYPE:` dans `gcodeParse.ts` (état courant jusqu'à la prochaine étiquette ou `; <layer>`), choisir
+  une couleur par type, la proposer dans l'aperçu. Les étiquettes sont des commentaires : `gcodeWriter.ts` doit les conserver.
+- État : ouverte (moteur fait ; interface à faire).
+
 ### R-027 — Profil d'imprimante : deux réglages de buse pour Element Aeolis
 - De : apex-engine | À : apex-ui | Contrat : C1 (ajout compatible ; un défaut change le G-code, à confirmer) | Ouverte : 2026-10-31
 - Besoin (utilisateur, 2026-10-31) : Aeolis doit trancher tous les modèles (erreur « n'est pas une surface en hauteur » levée) et
