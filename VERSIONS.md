@@ -7,6 +7,7 @@ Format et règles : [`integration/RULES.md`](integration/RULES.md), §9.
 Une ligne par version, la plus récente en haut :
 `<version> — <date> — <dépôt> @ <commit> — <ce qui change>`
 
+- `alpha-0.2.3.1.3.10.0.221` — 2026-11-03 — apex-ui @ bfa2dcb — Qualité sans compromis (R-031) : contrôle des limites avec cliquet, CI, TypeScript strict, 9 fichiers ramenés sous 800 lignes (détail et étapes `.3.2` à `.3.10` : `RELEASES.md` d'apex-ui). Le numéro de l'interface, plus élevé, s'applique (RULES §9.1) ; il rattrape aussi les versions de l'interface du 2026-10-31 (`.3.1.0`) non reportées ici.
 - `alpha-0.2.3.0.6.1.0.221` — 2026-11-01 — apex-engine @ e8cb91ed — Element Aeolis écrit le type de chaque ligne (`;TYPE:WALL-OUTER`, `WALL-INNER`, `FILL`, `SKIN`) pour colorer l'aperçu (R-028).
 - `alpha-0.2.3.0.6.0.0.221` — 2026-10-31 — apex-engine @ 6f879069 — Element Aeolis tranche toute géométrie (moteur général par sections planaires déformées) ; réglages de buse « Angle de la buse » (10°) et « Longueur maximale atteignable par la buse » (2 mm), défauts très bas (R-027).
 - `alpha-0.2.3.0.5.0.0.221` — 2026-10-30 — apex-engine @ 712ca806 — `main.py slice` appelle Element Aeolis (champ `algorithm`, racine `AeolisSliceParams` du schéma, refus `not_a_heightfield`) ; moteur de R-024 fait.
