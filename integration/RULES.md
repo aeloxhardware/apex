@@ -292,6 +292,11 @@ dans le dépôt commun, et il change à chaque nouvelle version du moteur comme 
   récupère d'abord le dernier état d'`apex` (`git pull`) : l'autre côté a pu changer le numéro
   entre-temps. En cas de conflit, on repart du numéro le plus récent et on applique sa
   propre montée de niveau dessus.
+- **Décision de l'utilisateur (2026-11-03) : le numéro le plus élevé s'applique, toujours.** Si le
+  numéro de l'interface et celui du moteur diffèrent, celui de l'interface s'applique ; et dans
+  tous les cas, quel que soit le côté qui l'a produit, c'est le plus élevé (comparé niveau par
+  niveau, de gauche à droite) qui fait foi. `apex/VERSION` ne baisse jamais. Une session dont le
+  numéro propre est plus bas repart du numéro de `apex/VERSION` avant d'appliquer sa montée.
 - **Côté interface**, `apexVersion` dans `package.json` (affiché sur l'écran de démarrage) et
   `RELEASES.md` (détail des changements de l'interface) restent tenus, et `apexVersion` vaut
   toujours `apex/VERSION`. **Côté moteur**, le détail reste dans le DT et les limites
