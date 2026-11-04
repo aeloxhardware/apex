@@ -7,6 +7,8 @@ Format et règles : [`integration/RULES.md`](integration/RULES.md), §9.
 Une ligne par version, la plus récente en haut :
 `<version> — <date> — <dépôt> @ <commit> — <ce qui change>`
 
+- `alpha-0.2.3.1.3.14.0.221` — 2026-11-04 — apex-ui @ f48220a — R-031 : tests du client du noyau d'édition (vérifiés par mutation).
+- `alpha-0.2.3.1.3.13.0.221` — 2026-11-04 — apex-ui @ b7eb9c0 — R-031 : `CLAUDE.md` ramené à 160 lignes, conception détaillée dans `docs/`.
 - `alpha-0.2.3.1.3.12.0.221` — 2026-11-04 — apex-ui @ b7defa2 — CI : version de pnpm fixée (`packageManager`), dossier `slicer_engine/` exclu d'ESLint.
 - `alpha-0.2.3.1.3.11.0.221` — 2026-11-03 — apex-ui @ 3e53dc2 — un seul gestionnaire de paquets côté interface : pnpm (`package-lock.json` supprimé).
 - `alpha-0.2.3.1.3.10.0.221` — 2026-11-03 — apex-ui @ bfa2dcb — Qualité sans compromis (R-031) : contrôle des limites avec cliquet, CI, TypeScript strict, 9 fichiers ramenés sous 800 lignes (détail et étapes `.3.2` à `.3.10` : `RELEASES.md` d'apex-ui). Le numéro de l'interface, plus élevé, s'applique (RULES §9.1) ; il rattrape aussi les versions de l'interface du 2026-10-31 (`.3.1.0`) non reportées ici.
