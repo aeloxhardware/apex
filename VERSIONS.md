@@ -7,6 +7,14 @@ Format et règles : [`integration/RULES.md`](integration/RULES.md), §9.
 Une ligne par version, la plus récente en haut :
 `<version> — <date> — <dépôt> @ <commit> — <ce qui change>`
 
+- `alpha-0.2.3.1.4.1.0.221` — 2026-11-04 — apex-engine @ 09819412 — R-030 point 5 : dépendances déclarées (`pyproject.toml`) et figées avec empreintes (`requirements.lock`), licences listées (`docs/LICENCES_DEPENDANCES.md`), CI du moteur, échecs connus PRE-001 identifiés.
+- `alpha-0.2.3.1.4.0.0.221` — 2026-11-04 — apex-engine + apex-ui — contrat moteur 3 : les défauts de buse d'Element Aeolis (10° / 2 mm) sont gardés et changent le G-code (R-027) ; libellé « Angle maximum buse-paroi » ; échéances par jalons (RULES §11.3). Moteur et interface à fusionner dans cet ordre.
+- `alpha-0.2.3.1.3.17.0.221` — 2026-11-04 — apex-engine @ 9599cc0 — R-030 : prototypes (14 `prototype_local_retriangulation*.py`) et anciens modules archivés dans la branche `archives` du moteur, retirés de `main`.
+- `alpha-0.2.3.1.3.16.0.221` — 2026-11-04 — apex-engine @ 61e23fe — R-029/R-030 : `scripts/check_limits.py` avec cliquet (dette de départ : 14 fichiers, 49 fonctions, 15 signatures), `out/` ignoré (608 Mo retirés de l'index), `out/oldmods/` supprimé. Le numéro le plus élevé s'applique (RULES §9.1).
+- `alpha-0.2.3.1.3.15.0.221` — 2026-11-04 — apex-ui @ 02eb2ad — R-031 : rayon du plateau lu dans le profil d'imprimante (150 mm, décision de l'utilisateur).
+- `alpha-0.2.3.1.3.14.0.221` — 2026-11-04 — apex-ui @ f48220a — R-031 : tests du client du noyau d'édition (vérifiés par mutation).
+- `alpha-0.2.3.1.3.13.0.221` — 2026-11-04 — apex-ui @ b7eb9c0 — R-031 : `CLAUDE.md` ramené à 160 lignes, conception détaillée dans `docs/`.
+- `alpha-0.2.3.1.3.12.0.221` — 2026-11-04 — apex-ui @ b7defa2 — CI : version de pnpm fixée (`packageManager`), dossier `slicer_engine/` exclu d'ESLint.
 - `alpha-0.2.3.1.3.11.0.221` — 2026-11-03 — apex-ui @ 3e53dc2 — un seul gestionnaire de paquets côté interface : pnpm (`package-lock.json` supprimé).
 - `alpha-0.2.3.1.3.10.0.221` — 2026-11-03 — apex-ui @ bfa2dcb — Qualité sans compromis (R-031) : contrôle des limites avec cliquet, CI, TypeScript strict, 9 fichiers ramenés sous 800 lignes (détail et étapes `.3.2` à `.3.10` : `RELEASES.md` d'apex-ui). Le numéro de l'interface, plus élevé, s'applique (RULES §9.1) ; il rattrape aussi les versions de l'interface du 2026-10-31 (`.3.1.0`) non reportées ici.
 - `alpha-0.2.3.0.6.1.0.221` — 2026-11-01 — apex-engine @ e8cb91ed — Element Aeolis écrit le type de chaque ligne (`;TYPE:WALL-OUTER`, `WALL-INNER`, `FILL`, `SKIN`) pour colorer l'aperçu (R-028).

@@ -107,7 +107,7 @@ Les demandes R-001 à R-011 viennent de l'inventaire du 2026-10-25 (`apex-engine
 - État : ouverte (moteur fait ; interface à faire).
 
 ### R-027 — Profil d'imprimante : deux réglages de buse pour Element Aeolis
-- De : apex-engine | À : apex-ui | Contrat : C1 (ajout compatible ; un défaut change le G-code, à confirmer) | Ouverte : 2026-10-31
+- De : apex-engine | À : apex-ui | Contrat : C1 (le défaut change le G-code : contrat 3, confirmé le 2026-11-04) | Ouverte : 2026-10-31
 - Besoin (utilisateur, 2026-10-31) : Aeolis doit trancher tous les modèles (erreur « n'est pas une surface en hauteur » levée) et
   l'utilisateur doit régler la buse selon son imprimante, défauts très bas pour ne pas casser les conduits de ventilation serrés.
 - Moteur (apex-engine@6f879069) : fait. `AeolisSliceParams` : `nozzle_angle_deg` (10, « Angle de la buse », pente max de la surface
@@ -117,9 +117,11 @@ Les demandes R-001 à R-011 viennent de l'inventaire du 2026-10-25 (`apex-engine
 - À faire, interface : exposer les deux réglages dans le profil d'imprimante (C7) et le formulaire Aeolis ; ne plus traduire
   l'absence de surface en hauteur en erreur ; afficher `report.mode` si utile. Le libellé de l'étape `heightfield` (« Modèle de
   surface en hauteur ») devient « Analyse du modèle » en mode général.
-- À confirmer par l'utilisateur : le sens exact des deux réglages (README d'Aeolis) et le changement de défaut (les plaques de test
-  passent au moteur général aux défauts bas).
-- État : ouverte (moteur fait ; interface à faire).
+- **Confirmé par l'utilisateur (2026-11-04)** : le sens des deux réglages est juste ; « Angle de la buse » est renommé
+  **« Angle maximum buse-paroi »** ; les défauts bas (10° / 2 mm) sont **gardés** pour éliminer les défauts. Un défaut qui change le
+  G-code incrémente le contrat : **contrat 3** (`CONTRACT_CHANGES.md`). L'interface passe `APEX_CONTRACT_VERSION` à 3 (fait dans
+  la PR d'apex-ui, à fusionner APRÈS celle du moteur : la construction échoue si les deux versions diffèrent).
+- État : ouverte (moteur fait, contrat 3 ; interface : libellé et contrat faits, formulaire à faire).
 
 ### R-012 — Monter `apex` : copie des deux dépôts et première release
 - De : apex | À : apex | Contrat : — | Ouverte : 2026-10-25

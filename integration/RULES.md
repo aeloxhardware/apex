@@ -393,3 +393,17 @@ décision écrite de l'utilisateur dans ce paragraphe. Elles sont mesurées, jam
   fichier) dans `apex/RELEASES.md`. Une release dont le rapport empire n'est pas publiée.
 - Les demandes R-029 à R-031 restent ouvertes jusqu'à ce que **tous** les écarts qu'elles listent
   soient fermés et vérifiés des deux côtés. Fermer une demande par une exception est interdit.
+
+### 11.3 Échéances : des jalons, pas de dates (décision de l'utilisateur, 2026-11-04)
+L'utilisateur ne veut pas de dates limites (« les diagrammes de Gantt, ça ne marche jamais »). Rappel fait par la
+session avant l'écriture : ce choix remplace deux exigences de date, et **R-030 point 2 reste donc ouvert jusqu'au jalon**.
+- **R-030 point 2, fin de la double implémentation Python/C++** : objectif **B, le Python est supprimé**. Aucune
+  date. Le jalon est atteint quand **le moteur est 100 % C++** (orchestrateur, ingestion, toutes les étapes, les deux
+  algorithmes Element Ardor et Element Aeolis, TetraNet, export, générateur du contrat) **et que le code est propre,
+  sans palliatif**. D'ici là, la double implémentation reste en place ; chaque pièce portée a son test d'équivalence
+  avant que le Python correspondant soit supprimé.
+- **Écarts de résultat acceptés comme nouvelle référence** (décision du même jour) : le remplissage natif (Clipper2 à la
+  place de shapely) et l'ordre des segments d'auto-intersection. Les références (G-code des quatre modèles de
+  `res/test_models/`) sont figées et ne changent plus qu'avec une mention explicite.
+- **Palliatifs (§11.1)** : l'identifiant et le test restent exigés ; la **date de revue est remplacée par une revue à
+  chaque release**. Un palliatif encore présent au jalon est un défaut du jalon.
