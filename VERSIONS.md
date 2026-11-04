@@ -7,6 +7,7 @@ Format et règles : [`integration/RULES.md`](integration/RULES.md), §9.
 Une ligne par version, la plus récente en haut :
 `<version> — <date> — <dépôt> @ <commit> — <ce qui change>`
 
+- `alpha-0.2.3.1.3.17.0.221` — 2026-11-04 — apex-engine @ 9599cc0 — R-030 : prototypes (14 `prototype_local_retriangulation*.py`) et anciens modules archivés dans la branche `archives` du moteur, retirés de `main`.
 - `alpha-0.2.3.1.3.16.0.221` — 2026-11-04 — apex-engine @ 61e23fe — R-029/R-030 : `scripts/check_limits.py` avec cliquet (dette de départ : 14 fichiers, 49 fonctions, 15 signatures), `out/` ignoré (608 Mo retirés de l'index), `out/oldmods/` supprimé. Le numéro le plus élevé s'applique (RULES §9.1).
 - `alpha-0.2.3.1.3.15.0.221` — 2026-11-04 — apex-ui @ 02eb2ad — R-031 : rayon du plateau lu dans le profil d'imprimante (150 mm, décision de l'utilisateur).
 - `alpha-0.2.3.1.3.14.0.221` — 2026-11-04 — apex-ui @ f48220a — R-031 : tests du client du noyau d'édition (vérifiés par mutation).
