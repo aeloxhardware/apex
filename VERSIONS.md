@@ -7,6 +7,8 @@ Format et règles : [`integration/RULES.md`](integration/RULES.md), §9.
 Une ligne par version, la plus récente en haut :
 `<version> — <date> — <dépôt> @ <commit> — <ce qui change>`
 
+- `alpha-0.2.3.1.3.16.0.221` — 2026-11-04 — apex-engine @ 61e23fe — R-029/R-030 : `scripts/check_limits.py` avec cliquet (dette de départ : 14 fichiers, 49 fonctions, 15 signatures), `out/` ignoré (608 Mo retirés de l'index), `out/oldmods/` supprimé. Le numéro le plus élevé s'applique (RULES §9.1).
+- `alpha-0.2.3.1.3.15.0.221` — 2026-11-04 — apex-ui @ 02eb2ad — R-031 : rayon du plateau lu dans le profil d'imprimante (150 mm, décision de l'utilisateur).
 - `alpha-0.2.3.1.3.14.0.221` — 2026-11-04 — apex-ui @ f48220a — R-031 : tests du client du noyau d'édition (vérifiés par mutation).
 - `alpha-0.2.3.1.3.13.0.221` — 2026-11-04 — apex-ui @ b7eb9c0 — R-031 : `CLAUDE.md` ramené à 160 lignes, conception détaillée dans `docs/`.
 - `alpha-0.2.3.1.3.12.0.221` — 2026-11-04 — apex-ui @ b7defa2 — CI : version de pnpm fixée (`packageManager`), dossier `slicer_engine/` exclu d'ESLint.
