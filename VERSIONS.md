@@ -7,6 +7,7 @@ Format et règles : [`integration/RULES.md`](integration/RULES.md), §9.
 Une ligne par version, la plus récente en haut :
 `<version> — <date> — <dépôt> @ <commit> — <ce qui change>`
 
+- `alpha-0.2.3.1.4.4.0.221` — 2026-11-05 — apex-engine @ babdaefa — R-030 point 3 (passe 3, début) : deux globaux mutables remplacés par des objets passés par l'appelant (`IkTelemetry` pour step8, `OutlineStats` pour step5). Restent le cache du contrôleur de collision (step9/step10), l'état de `core/progress.py` et l'installation des options dans `core/_cpp.py`. Aucun changement de schéma ni de G-code.
 - `alpha-0.2.3.1.4.3.0.221` — 2026-11-05 — apex-engine @ eba094e1 — R-030 point 3 (passe 2) : `RuntimeOptions` (`core/runtime.py`) remplace `APEX_USE_CPP`, `APEX_USE_GPU`, `APEX_CPP_GRID_MODE`, `APEX_CPP_LIB_DIR`, `APEX_TETGEN_WORKER` et `APEX_TETGEN_LOG` ; la bibliothèque ne lit plus l'environnement, seuls les points d'entrée le font. Aucun champ du schéma ni du G-code ne change. Reste la passe 3 (état global).
 - `alpha-0.2.3.1.4.2.1.221` — 2026-11-05 — apex-engine @ f2cba8f1 — correctif : `tetranet` compile sous MSVC (`M_PI` remplacé par une constante locale, ce qui débloquait la reconstruction du module natif) ; note de contrat sur les options natives explicites (R-030 point 3, numéro de contrat inchangé).
 - `alpha-0.2.3.1.4.2.0.221` — 2026-11-04 — apex-engine @ 0c4e3f0b — R-030 point 3 (début) : `APEX_NATIVE_FILL`, `APEX_NATIVE_LAYER` et `APEX_NATIVE_GRID` remplacées par des champs de `Step6Params` / `Step8Params` (défauts inchangés, nouveaux champs dans le schéma JSON).
