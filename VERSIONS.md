@@ -7,6 +7,7 @@ Format et règles : [`integration/RULES.md`](integration/RULES.md), §9.
 Une ligne par version, la plus récente en haut :
 `<version> — <date> — <dépôt> @ <commit> — <ce qui change>`
 
+- `alpha-0.2.3.1.4.3.0.221` — 2026-11-05 — apex-engine @ eba094e1 — R-030 point 3 (passe 2) : `RuntimeOptions` (`core/runtime.py`) remplace `APEX_USE_CPP`, `APEX_USE_GPU`, `APEX_CPP_GRID_MODE`, `APEX_CPP_LIB_DIR`, `APEX_TETGEN_WORKER` et `APEX_TETGEN_LOG` ; la bibliothèque ne lit plus l'environnement, seuls les points d'entrée le font. Aucun champ du schéma ni du G-code ne change. Reste la passe 3 (état global).
 - `alpha-0.2.3.1.4.2.1.221` — 2026-11-05 — apex-engine @ f2cba8f1 — correctif : `tetranet` compile sous MSVC (`M_PI` remplacé par une constante locale, ce qui débloquait la reconstruction du module natif) ; note de contrat sur les options natives explicites (R-030 point 3, numéro de contrat inchangé).
 - `alpha-0.2.3.1.4.2.0.221` — 2026-11-04 — apex-engine @ 0c4e3f0b — R-030 point 3 (début) : `APEX_NATIVE_FILL`, `APEX_NATIVE_LAYER` et `APEX_NATIVE_GRID` remplacées par des champs de `Step6Params` / `Step8Params` (défauts inchangés, nouveaux champs dans le schéma JSON).
 - `alpha-0.2.3.1.4.1.0.221` — 2026-11-04 — apex-engine @ 09819412 — R-030 point 5 : dépendances déclarées (`pyproject.toml`) et figées avec empreintes (`requirements.lock`), licences listées (`docs/LICENCES_DEPENDANCES.md`), CI du moteur, échecs connus PRE-001 identifiés.
