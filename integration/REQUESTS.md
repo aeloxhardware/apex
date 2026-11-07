@@ -71,7 +71,17 @@ Les demandes R-001 à R-011 viennent de l'inventaire du 2026-10-25 (`apex-engine
      (`tetranet/CLAUDE.md`) ; fermer l'écart, avec test.
   9. **Palliatifs** : lift-and-traverse (limite #49) et repli natif→Python reçoivent identifiant, test
      et date de revue ; le vrai routage 3D remplace le palliatif.
-- État : ouverte.
+- État : **ouverte, avancée le 2026-11-07** (apex-engine @ 8e9b1a9b, branche `r030-dette-moteur`, tests dans les deux
+  positions du commutateur natif : 577 en Python, 583 en natif, 0 échec ; `check_limits`, `check_hidden_state` et
+  `check_palliatives` verts).
+  - Faits : 1 (0 dette de taille), 3 (`core/runtime.py` ; plus de `global` ; `APEX_USE_CPP` etc. retirées), 4 pour la
+    cinématique, les limites d'axes, le plateau et la tête (`res/machines/`), 5, 6, 7 (sauf les copies `*_local_*` hors
+    dépôts, laissées par la consigne de la racine), 9 (`docs/PALLIATIFS.md`, revue à chaque release).
+  - **Ouverts** : **2** (jalon « moteur 100 % C++ », RULES §11.3, aucune date ; le Python n'est pas supprimé) ;
+    **8** (TetraNet : écart de coque, p99 0,29 / 0,23 mm sur death / turkish, ramené à 0,017 / 0,13 mm par la
+    projection des contours (opt-in) ; 0,2 % / 1,9 % des points restent au-delà de 0,1 mm ; parois plus fines que la
+    maille non corrigées ; limite #86, piste du raffinement local à explorer) ; **4, reste** : vitesses et longueur de
+    pivot du G-code encore en code (`GcodeParams`).
 
 ### R-031 — Interface : résorber toute la dette relevée par l'audit (priorité sur tout le reste)
 - De : apex | À : apex-ui | Contrat : — | Ouverte : 2026-11-01
@@ -92,6 +102,22 @@ Les demandes R-001 à R-011 viennent de l'inventaire du 2026-10-25 (`apex-engine
   5. **Machines et têtes en données** (`profiles/`) : rien en dur dans les composants.
   6. **Hygiène** : dépendances figées et listées aux crédits ; supprimer les copies `*_local_*` ;
      `CLAUDE.md` court, historique dans `RELEASES.md`.
+- État : **faite côté interface, vérifiée par la session moteur le 2026-11-07 (lecture seule d'`apex-ui` @ fb2d995)**,
+  pas encore fermée : `Viewport3D.tsx` 6 551 → 186 lignes et plus aucun fichier au-dessus de 769 ; `tsc` propre ;
+  `strict`, `noImplicitAny`, `noUnusedLocals`, `noUnusedParameters` actifs ; 228 tests passent (32 fichiers) ;
+  `eslint` 0 erreur ; `check-limits`, `vectors:check`, `licenses:check` verts. **Reste** : (a) la hauteur du volume
+  d'impression (130 mm) est encore en dur (point 5) ; (b) 4 commits d'`apex-ui` ne sont pas poussés ; (c) les copies
+  `*_local_*` existent encore à la racine ; (d) `schema:check` échoue tant que le schéma moteur de `apex-engine` @
+  8e9b1a9b n'est pas resynchronisé (R-032).
+
+### R-032 — Resynchroniser le schéma du moteur et lancer le moteur sans variable d'environnement
+- De : apex-engine | À : apex-ui | Contrat : C1 (ajout compatible) | Ouverte : 2026-11-07
+- Besoin : le moteur (apex-engine @ 8e9b1a9b) a ajouté trois champs OPTIONNELS à `PipelineParams`, désactivés par défaut :
+  `runtime` (`native`, `gpu`, `grid_mode`, `tetgen_worker`, `tetgen_log`, `speculative_tetgen`, `step6_threads`),
+  `skin_projection` et `tetranet_feature_angle_deg`. Le G-code est inchangé par défaut (contrat toujours à 3).
+- À faire, interface : (1) `pnpm schema:sync` puis commiter la copie ; (2) si le lanceur du moteur positionnait
+  `APEX_USE_CPP=1` (ou `APEX_TETGEN_WORKER`, `APEX_USE_GPU`) dans l'environnement du processus, envoyer à la place
+  `"params": {"runtime": {"native": true}}` : ces variables ne sont plus lues. (3) Rien d'autre n'est requis.
 - État : ouverte.
 
 ### R-028 — Colorer l'aperçu d'Element Aeolis d'après le type de chaque ligne
