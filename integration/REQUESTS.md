@@ -77,11 +77,12 @@ Les demandes R-001 à R-011 viennent de l'inventaire du 2026-10-25 (`apex-engine
   - Faits : 1 (0 dette de taille), 3 (`core/runtime.py` ; plus de `global` ; `APEX_USE_CPP` etc. retirées), 4 pour la
     cinématique, les limites d'axes, le plateau et la tête (`res/machines/`), 5, 6, 7 (sauf les copies `*_local_*` hors
     dépôts, laissées par la consigne de la racine), 9 (`docs/PALLIATIFS.md`, revue à chaque release).
-  - **Ouverts** : **2** (jalon « moteur 100 % C++ », RULES §11.3, aucune date ; le Python n'est pas supprimé) ;
-    **8** (TetraNet : écart de coque, p99 0,29 / 0,23 mm sur death / turkish, ramené à 0,017 / 0,13 mm par la
-    projection des contours (opt-in) ; 0,2 % / 1,9 % des points restent au-delà de 0,1 mm ; parois plus fines que la
-    maille non corrigées ; limite #86, piste du raffinement local à explorer) ; **4, reste** : vitesses et longueur de
-    pivot du G-code encore en code (`GcodeParams`).
+  - **Points 2 et 8 : à fermer par la décision écrite de RULES §11.4** (en attente de push par l'utilisateur) : le point 2
+    (jalon « moteur 100 % C++ ») est transféré à R-014 ; le point 8 (TetraNet) devient la limite connue #86 (écart de
+    coque p99 0,29 / 0,23 mm sur death / turkish, 0,017 / 0,13 mm avec la projection des contours, 0,2 % / 1,9 % des
+    points au-delà de 0,1 mm, piste du raffinement local de la maille à explorer).
+  - Point 4 : tout ce que la demande liste est fait. (Hors liste : vitesses et longueur de pivot du G-code restent dans
+    `GcodeParams`.)
 
 ### R-031 — Interface : résorber toute la dette relevée par l'audit (priorité sur tout le reste)
 - De : apex | À : apex-ui | Contrat : — | Ouverte : 2026-11-01

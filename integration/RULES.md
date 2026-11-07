@@ -407,3 +407,15 @@ session avant l'écriture : ce choix remplace deux exigences de date, et **R-030
   `res/test_models/`) sont figées et ne changent plus qu'avec une mention explicite.
 - **Palliatifs (§11.1)** : l'identifiant et le test restent exigés ; la **date de revue est remplacée par une revue à
   chaque release**. Un palliatif encore présent au jalon est un défaut du jalon.
+
+### 11.4 Précision de l'utilisateur, 2026-11-07 (rappel fait par la session avant l'écriture)
+Le jalon « moteur 100 % C++ » (§11.3) est un **jalon de feuille de route**, suivi par **R-014**. Il ne retient pas R-029 à
+R-031 ouvertes : la phrase « R-030 point 2 reste donc ouvert jusqu'au jalon » du §11.3 était un rappel de la session, pas
+la décision de l'utilisateur. Décisions :
+- **R-030 point 2** est fermé par transfert à R-014. Ce qui reste non corrigé : le Python n'est pas supprimé et le moteur
+  n'est pas 100 % C++ ; la double implémentation et ses tests d'équivalence restent en place.
+- **R-030 point 8 (TetraNet)** est fermé en tant que **limite connue** (limite #86 du moteur), avec la piste du raffinement
+  local de la maille à explorer. Ce qui reste non corrigé : avec la projection des contours (étape 5c, opt-in), l'écart de la
+  coque au STL est de 0,017 mm (p99) sur death et de 0,13 mm sur turkish, dont 1,9 % des points au-delà de 0,1 mm (parois
+  plus fines que la maille) ; sans la projection, 0,29 et 0,23 mm. TetGen reste le mailleur par défaut.
+- Un écart déclaré ici n'est pas une exception cachée : il est nommé, mesuré, et suivi dans le registre des limites du moteur.
