@@ -7,6 +7,7 @@ Format et règles : [`integration/RULES.md`](integration/RULES.md), §9.
 Une ligne par version, la plus récente en haut :
 `<version> — <date> — <dépôt> @ <commit> — <ce qui change>`
 
+- `alpha-0.2.3.1.5.0.0.221` — 2026-11-07 — apex-engine @ 8e9b1a9b — R-030 points 3, 4, 7, 9 : options d'exécution explicites (`params.runtime`), machine et tête en données (`res/machines/`), `CLAUDE.md` découpé, vrais paquets `element_ardor` / `element_aeolis`, registre des palliatifs ; point 8 partiel : étape 5c (projection des contours, opt-in) et limite #86. Champs optionnels ajoutés au schéma (défauts inchangés).
 - `alpha-0.2.3.1.4.2.0.221` — 2026-11-04 — apex-engine @ 0c4e3f0b — R-030 point 3 (début) : `APEX_NATIVE_FILL`, `APEX_NATIVE_LAYER` et `APEX_NATIVE_GRID` remplacées par des champs de `Step6Params` / `Step8Params` (défauts inchangés, nouveaux champs dans le schéma JSON).
 - `alpha-0.2.3.1.4.1.0.221` — 2026-11-04 — apex-engine @ 09819412 — R-030 point 5 : dépendances déclarées (`pyproject.toml`) et figées avec empreintes (`requirements.lock`), licences listées (`docs/LICENCES_DEPENDANCES.md`), CI du moteur, échecs connus PRE-001 identifiés.
 - `alpha-0.2.3.1.4.0.0.221` — 2026-11-04 — apex-engine + apex-ui — contrat moteur 3 : les défauts de buse d'Element Aeolis (10° / 2 mm) sont gardés et changent le G-code (R-027) ; libellé « Angle maximum buse-paroi » ; échéances par jalons (RULES §11.3). Moteur et interface à fusionner dans cet ordre.

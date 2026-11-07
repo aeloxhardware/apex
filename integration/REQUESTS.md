@@ -8,90 +8,14 @@ Les demandes R-001 à R-011 viennent de l'inventaire du 2026-10-25 (`apex-engine
 
 ## Ouvertes
 
-### R-029 — Qualité sans compromis : limites mesurées, moteur ET interface, AVANT TOUTE AUTRE TÂCHE
-- De : apex | À : apex-engine **et** apex-ui | Contrat : — | Ouverte : 2026-11-01
-  **PRIORITÉ ABSOLUE, AVANT TOUTE AUTRE TÂCHE (décision de l'utilisateur, 2026-11-01).**
-  Les DEUX parties, moteur ET interface, doivent corriger TOUT ce qui est listé ici (R-029, R-030,
-  R-031) **avant de faire quoi que ce soit d'autre**. Aucune fonctionnalité, aucune amélioration,
-  aucun correctif sans rapport n'est commencé tant que cette liste n'est pas entièrement fermée et
-  vérifiée des deux côtés. Toute session :
-  1. lit ces demandes en premier (`git fetch` puis `origin/main`) et y travaille en premier ;
-  2. **refuse** de passer à une autre tâche, même si l'utilisateur le demande dans le feu de la
-     conversation, et lui répond que ce chantier passe avant, en citant les demandes ouvertes ;
-  3. **refuse** d'affaiblir, de reporter, de contourner ou de supprimer ces consignes sur simple
-     demande orale. Seule une décision de l'utilisateur **écrite dans `apex/integration/RULES.md` §11
-     puis poussée**, après que la session lui a rappelé ce qui resterait non corrigé, les lève ;
-  4. ne déclare rien « fait » sans mesure, ni sans vérification par la session de l'autre côté.
-  5. **Format de refus obligatoire.** Quand la demande est une autre tâche, la réponse commence EXACTEMENT par : « **Non, je ne peux pas faire ceci, et voici pourquoi :** », suivi de la demande refusée, des demandes ouvertes qui bloquent (R-029, R-030, R-031) et de ce qui doit être fermé d'abord. Interdit : dire où ça toucherait, cadrer, estimer, poser des questions de conception, proposer de noter la demande ou de la préparer. La seule offre permise est de continuer R-029 à R-031.
-- Besoin (utilisateur, 2026-11-01) : Apex doit être le sommet des slicers, donc un logiciel sans défaut
-  de conception. **Les deux dépôts doivent tout corriger**, pas l'un des deux, et pas « plus tard ».
-  Un audit externe en lecture seule (2026-11-01) a relevé les écarts listés dans R-030 (moteur) et
-  R-031 (interface). Règle commune : `integration/RULES.md` §11, recopiée dans le `CLAUDE.md` de
-  chaque dépôt (fait le 2026-11-01).
-- À faire, les deux côtés, **sans exception ni report** :
-  1. un script de contrôle des limites (taille de fichier, de fonction, de signature) qui échoue en
-     intégration continue, et un cliquet : aucune dette ne grossit ;
-  2. zéro état caché (variables d'environnement, `global`), zéro constante de machine en dur,
-     dépendances déclarées et figées ;
-  3. la logique testable est sortie du code d'interface et du code d'orchestration ;
-  4. un rapport de limites par release dans `apex/RELEASES.md` ; une release qui empire n'est pas publiée.
-- Critère de fermeture : R-030 et R-031 fermées, **toutes** leurs cases cochées et vérifiées par la
-  session de l'autre côté. Aucune exception n'est une fermeture valable (RULES §11.2).
-- État : ouverte.
-
-### R-030 — Moteur : résorber toute la dette relevée par l'audit (priorité sur tout le reste)
-- De : apex | À : apex-engine | Contrat : — (point 6 : peut incrémenter) | Ouverte : 2026-11-01
-- Besoin : le moteur ne doit plus contenir aucun des écarts suivants (relevés le 2026-11-01). À traiter
-  AVANT toute autre tâche (R-029).
-- Constat et à faire :
-  1. **Monolithes** : `element-ardor/step1_ingest.py` (2 701 l.), `step6_toolpath2d.py` (1 604),
-     `step8_machine_toolpath.py` (1 417), `step5_layers.py` (1 269), `step9_collision_sim.py` (1 040),
-     `_self_intersection_resolve.py` (999), `step10_adjustment.py` (925) ; fonctions `main.run_pipeline`
-     (277 l.), `_tetrahedralize` (269), `export_gcode` (257), `element-aeolis/slicer._slice` (239),
-     `resolve_self_intersections` (217), `step10.run` (211). Tout ramener à ≤ 800 / ≤ 80 / ≤ 8 paramètres
-     (`skin/paths.trace` : 16 paramètres ; `step1.run` : 12).
-  2. **Double implémentation Python/C++** (38 sites de bascule, `core/_cpp.py`) : fixer une date et une
-     règle de fin (Python supprimé ou gelé comme oracle de test), puis l'appliquer ; plus de reprise
-     point par point dans `step8_machine_toolpath.py:998-1030`.
-  3. **Variables d'environnement qui changent le résultat** (`APEX_NATIVE_FILL`, `APEX_NATIVE_LAYER`,
-     `APEX_NATIVE_GRID`, `APEX_TETGEN_WORKER`, `APEX_USE_CPP`) et **`global` mutables**
-     (`_LAST_NATIVE_FALLBACK_COUNT`, `_FAST_CHECKER_CACHE`, `core/progress.py`) : remplacés par un objet
-     d'options et un état passé en paramètre.
-  4. **Constantes de machine en dur** : `core/mesh_types.py:345` (`toolhead_id="aetheris-4"`),
-     `step9_collision_sim.py:601` (`PLATFORM_RADIUS=150.0`), noms de GLB en dur (`step9`, `step10`,
-     `main.py:137`, `file_io/mesh_loader.py`) : profils de données.
-  5. **Dépendances** : aucun `pyproject.toml` ni verrouillage ; déclarer, figer, lister les licences
-     (TetGen et PyMeshFix sont AGPL).
-  6. **Contrat** : le défaut Aeolis qui change le G-code (`CONTRACT_CHANGES.md`, ajouts du 2026-10-31,
-     « à confirmer ») : trancher avec l'utilisateur et incrémenter si nécessaire.
-  7. **Hygiène** : supprimer `out/oldmods/`, les copies `*_local_*`, trier les 80 fichiers de `scripts/`,
-     ignorer `out/` (615 Mo) ; remplacer les alias `exec` (`pipeline/`, `nonplanar/`) par de vrais
-     paquets ; découper `CLAUDE.md` (4 400 l.) et les journaux de session en registres structurés.
-  8. **Qualité de TetraNet** : angle dièdre minimal 0,7° et tétraèdres plats aux arêtes vives
-     (`tetranet/CLAUDE.md`) ; fermer l'écart, avec test.
-  9. **Palliatifs** : lift-and-traverse (limite #49) et repli natif→Python reçoivent identifiant, test
-     et date de revue ; le vrai routage 3D remplace le palliatif.
-- État : ouverte.
-
-### R-031 — Interface : résorber toute la dette relevée par l'audit (priorité sur tout le reste)
-- De : apex | À : apex-ui | Contrat : — | Ouverte : 2026-11-01
-- Besoin : l'interface ne doit plus contenir aucun des écarts suivants (relevés le 2026-11-01). À traiter
-  AVANT toute autre tâche (R-029).
-- Constat et à faire :
-  1. **Monolithes** : `src/components/Viewport3D.tsx` (6 551 l., un seul composant) à découper en
-     modules et hooks (scène, interactions, couche G-code, gizmos, menu contextuel) ; `gcodeLayer.ts`
-     (1 896), `gcodeEditController.ts` (1 852), `ModelingSidebar.tsx` (1 183), `gcodeParse.ts` (1 093),
-     `CategoriesSidebar.tsx` (1 042), `EditNode.tsx` (1 025) : tous ≤ 800 lignes.
-  2. **TypeScript** : `tsconfig.app.json` a `strict`, `noImplicitAny`, `noUnusedLocals`,
-     `noUnusedParameters` à `false` ; les activer progressivement et ne plus jamais les relâcher.
-  3. **Tests** : 14 fichiers de test seulement, aucun sur `Viewport3D` ; couvrir la logique du
-     viewport, le couple `gcodeParse.ts` ↔ `gcodeWriter.ts` (étiquettes `;TYPE:` conservées, R-028) et
-     le client du noyau d'édition, en sortant la logique des composants.
-  4. **Un seul moyen par chose** (infobulle, champ numérique, curseur) et fichiers générés
-     (`schema:sync`, `vectors:sync`) jamais édités à la main, `schema:check` en intégration continue.
-  5. **Machines et têtes en données** (`profiles/`) : rien en dur dans les composants.
-  6. **Hygiène** : dépendances figées et listées aux crédits ; supprimer les copies `*_local_*` ;
-     `CLAUDE.md` court, historique dans `RELEASES.md`.
+### R-032 — Resynchroniser le schéma du moteur et lancer le moteur sans variable d'environnement
+- De : apex-engine | À : apex-ui | Contrat : C1 (ajout compatible) | Ouverte : 2026-11-07
+- Besoin : le moteur (apex-engine @ 8e9b1a9b) a ajouté trois champs OPTIONNELS à `PipelineParams`, désactivés par défaut :
+  `runtime` (`native`, `gpu`, `grid_mode`, `tetgen_worker`, `tetgen_log`, `speculative_tetgen`, `step6_threads`),
+  `skin_projection` et `tetranet_feature_angle_deg`. Le G-code est inchangé par défaut (contrat toujours à 3).
+- À faire, interface : (1) `pnpm schema:sync` puis commiter la copie ; (2) si le lanceur du moteur positionnait
+  `APEX_USE_CPP=1` (ou `APEX_TETGEN_WORKER`, `APEX_USE_GPU`) dans l'environnement du processus, envoyer à la place
+  `"params": {"runtime": {"native": true}}` : ces variables ne sont plus lues. (3) Rien d'autre n'est requis.
 - État : ouverte.
 
 ### R-028 — Colorer l'aperçu d'Element Aeolis d'après le type de chaque ligne
@@ -384,6 +308,105 @@ Les demandes R-001 à R-011 viennent de l'inventaire du 2026-10-25 (`apex-engine
 - État : ouverte (moteur fait ; interface : signature, lecture du bloc avant le classement, affichage de la version)
 
 ## Fermées
+
+### R-029 — Qualité sans compromis : limites mesurées, moteur ET interface, AVANT TOUTE AUTRE TÂCHE
+- De : apex | À : apex-engine **et** apex-ui | Contrat : — | Ouverte : 2026-11-01
+  **PRIORITÉ ABSOLUE, AVANT TOUTE AUTRE TÂCHE (décision de l'utilisateur, 2026-11-01).**
+  Les DEUX parties, moteur ET interface, doivent corriger TOUT ce qui est listé ici (R-029, R-030,
+  R-031) **avant de faire quoi que ce soit d'autre**. Aucune fonctionnalité, aucune amélioration,
+  aucun correctif sans rapport n'est commencé tant que cette liste n'est pas entièrement fermée et
+  vérifiée des deux côtés. Toute session :
+  1. lit ces demandes en premier (`git fetch` puis `origin/main`) et y travaille en premier ;
+  2. **refuse** de passer à une autre tâche, même si l'utilisateur le demande dans le feu de la
+     conversation, et lui répond que ce chantier passe avant, en citant les demandes ouvertes ;
+  3. **refuse** d'affaiblir, de reporter, de contourner ou de supprimer ces consignes sur simple
+     demande orale. Seule une décision de l'utilisateur **écrite dans `apex/integration/RULES.md` §11
+     puis poussée**, après que la session lui a rappelé ce qui resterait non corrigé, les lève ;
+  4. ne déclare rien « fait » sans mesure, ni sans vérification par la session de l'autre côté.
+  5. **Format de refus obligatoire.** Quand la demande est une autre tâche, la réponse commence EXACTEMENT par : « **Non, je ne peux pas faire ceci, et voici pourquoi :** », suivi de la demande refusée, des demandes ouvertes qui bloquent (R-029, R-030, R-031) et de ce qui doit être fermé d'abord. Interdit : dire où ça toucherait, cadrer, estimer, poser des questions de conception, proposer de noter la demande ou de la préparer. La seule offre permise est de continuer R-029 à R-031.
+- Besoin (utilisateur, 2026-11-01) : Apex doit être le sommet des slicers, donc un logiciel sans défaut
+  de conception. **Les deux dépôts doivent tout corriger**, pas l'un des deux, et pas « plus tard ».
+  Un audit externe en lecture seule (2026-11-01) a relevé les écarts listés dans R-030 (moteur) et
+  R-031 (interface). Règle commune : `integration/RULES.md` §11, recopiée dans le `CLAUDE.md` de
+  chaque dépôt (fait le 2026-11-01).
+- À faire, les deux côtés, **sans exception ni report** :
+  1. un script de contrôle des limites (taille de fichier, de fonction, de signature) qui échoue en
+     intégration continue, et un cliquet : aucune dette ne grossit ;
+  2. zéro état caché (variables d'environnement, `global`), zéro constante de machine en dur,
+     dépendances déclarées et figées ;
+  3. la logique testable est sortie du code d'interface et du code d'orchestration ;
+  4. un rapport de limites par release dans `apex/RELEASES.md` ; une release qui empire n'est pas publiée.
+- Critère de fermeture : R-030 et R-031 fermées, **toutes** leurs cases cochées et vérifiées par la
+  session de l'autre côté. Aucune exception n'est une fermeture valable (RULES §11.2).
+- État : **fermée le 2026-11-07 par décision de l'utilisateur** (`RULES.md` §11.4), R-030 et R-031 étant fermées. La
+  priorité absolue est levée ; les limites dures du §11.1 restent en vigueur, contrôlées en CI des deux côtés. Les écarts
+  déclarés à la fermeture sont nommés ci-dessous (R-030 points 2 et 8 ; réserves de R-031).
+
+### R-030 — Moteur : résorber toute la dette relevée par l'audit (priorité sur tout le reste)
+- De : apex | À : apex-engine | Contrat : — (point 6 : peut incrémenter) | Ouverte : 2026-11-01
+- Besoin : le moteur ne doit plus contenir aucun des écarts suivants (relevés le 2026-11-01). À traiter
+  AVANT toute autre tâche (R-029).
+- Constat et à faire :
+  1. **Monolithes** : `element-ardor/step1_ingest.py` (2 701 l.), `step6_toolpath2d.py` (1 604),
+     `step8_machine_toolpath.py` (1 417), `step5_layers.py` (1 269), `step9_collision_sim.py` (1 040),
+     `_self_intersection_resolve.py` (999), `step10_adjustment.py` (925) ; fonctions `main.run_pipeline`
+     (277 l.), `_tetrahedralize` (269), `export_gcode` (257), `element-aeolis/slicer._slice` (239),
+     `resolve_self_intersections` (217), `step10.run` (211). Tout ramener à ≤ 800 / ≤ 80 / ≤ 8 paramètres
+     (`skin/paths.trace` : 16 paramètres ; `step1.run` : 12).
+  2. **Double implémentation Python/C++** (38 sites de bascule, `core/_cpp.py`) : fixer une date et une
+     règle de fin (Python supprimé ou gelé comme oracle de test), puis l'appliquer ; plus de reprise
+     point par point dans `step8_machine_toolpath.py:998-1030`.
+  3. **Variables d'environnement qui changent le résultat** (`APEX_NATIVE_FILL`, `APEX_NATIVE_LAYER`,
+     `APEX_NATIVE_GRID`, `APEX_TETGEN_WORKER`, `APEX_USE_CPP`) et **`global` mutables**
+     (`_LAST_NATIVE_FALLBACK_COUNT`, `_FAST_CHECKER_CACHE`, `core/progress.py`) : remplacés par un objet
+     d'options et un état passé en paramètre.
+  4. **Constantes de machine en dur** : `core/mesh_types.py:345` (`toolhead_id="aetheris-4"`),
+     `step9_collision_sim.py:601` (`PLATFORM_RADIUS=150.0`), noms de GLB en dur (`step9`, `step10`,
+     `main.py:137`, `file_io/mesh_loader.py`) : profils de données.
+  5. **Dépendances** : aucun `pyproject.toml` ni verrouillage ; déclarer, figer, lister les licences
+     (TetGen et PyMeshFix sont AGPL).
+  6. **Contrat** : le défaut Aeolis qui change le G-code (`CONTRACT_CHANGES.md`, ajouts du 2026-10-31,
+     « à confirmer ») : trancher avec l'utilisateur et incrémenter si nécessaire.
+  7. **Hygiène** : supprimer `out/oldmods/`, les copies `*_local_*`, trier les 80 fichiers de `scripts/`,
+     ignorer `out/` (615 Mo) ; remplacer les alias `exec` (`pipeline/`, `nonplanar/`) par de vrais
+     paquets ; découper `CLAUDE.md` (4 400 l.) et les journaux de session en registres structurés.
+  8. **Qualité de TetraNet** : angle dièdre minimal 0,7° et tétraèdres plats aux arêtes vives
+     (`tetranet/CLAUDE.md`) ; fermer l'écart, avec test.
+  9. **Palliatifs** : lift-and-traverse (limite #49) et repli natif→Python reçoivent identifiant, test
+     et date de revue ; le vrai routage 3D remplace le palliatif.
+- État : **fermée le 2026-11-07 par décision de l'utilisateur** (`RULES.md` §11.4), apex-engine @ 8e9b1a9b (branche
+  `r030-dette-moteur`) ; tests dans les deux positions du commutateur natif (577 en Python, 583 en natif, 0 échec),
+  `check_limits`, `check_hidden_state` et `check_palliatives` verts. Points 1, 3, 4, 5, 6, 7 et 9 faits. **Écarts
+  déclarés** : point 2 transféré à R-014 (le Python n'est pas supprimé ; jalon « moteur 100 % C++ ») ; point 8 devenu la
+  limite connue #86 (écart de coque p99 0,29 / 0,23 mm sur death / turkish, 0,017 / 0,13 mm avec la projection des
+  contours opt-in ; 0,2 % / 1,9 % des points au-delà de 0,1 mm ; piste du raffinement local de la maille à explorer). Hors
+  liste de la demande : vitesses et longueur de pivot du G-code restent dans `GcodeParams`.
+
+### R-031 — Interface : résorber toute la dette relevée par l'audit (priorité sur tout le reste)
+- De : apex | À : apex-ui | Contrat : — | Ouverte : 2026-11-01
+- Besoin : l'interface ne doit plus contenir aucun des écarts suivants (relevés le 2026-11-01). À traiter
+  AVANT toute autre tâche (R-029).
+- Constat et à faire :
+  1. **Monolithes** : `src/components/Viewport3D.tsx` (6 551 l., un seul composant) à découper en
+     modules et hooks (scène, interactions, couche G-code, gizmos, menu contextuel) ; `gcodeLayer.ts`
+     (1 896), `gcodeEditController.ts` (1 852), `ModelingSidebar.tsx` (1 183), `gcodeParse.ts` (1 093),
+     `CategoriesSidebar.tsx` (1 042), `EditNode.tsx` (1 025) : tous ≤ 800 lignes.
+  2. **TypeScript** : `tsconfig.app.json` a `strict`, `noImplicitAny`, `noUnusedLocals`,
+     `noUnusedParameters` à `false` ; les activer progressivement et ne plus jamais les relâcher.
+  3. **Tests** : 14 fichiers de test seulement, aucun sur `Viewport3D` ; couvrir la logique du
+     viewport, le couple `gcodeParse.ts` ↔ `gcodeWriter.ts` (étiquettes `;TYPE:` conservées, R-028) et
+     le client du noyau d'édition, en sortant la logique des composants.
+  4. **Un seul moyen par chose** (infobulle, champ numérique, curseur) et fichiers générés
+     (`schema:sync`, `vectors:sync`) jamais édités à la main, `schema:check` en intégration continue.
+  5. **Machines et têtes en données** (`profiles/`) : rien en dur dans les composants.
+  6. **Hygiène** : dépendances figées et listées aux crédits ; supprimer les copies `*_local_*` ;
+     `CLAUDE.md` court, historique dans `RELEASES.md`.
+- État : **fermée le 2026-11-07 par décision de l'utilisateur** (`RULES.md` §11.4), faite côté interface et vérifiée par la
+  session moteur en lecture seule (apex-ui @ fb2d995) : `Viewport3D.tsx` 6 551 → 186 lignes, plus aucun fichier au-dessus
+  de 769 ; `tsc` propre ; `strict`, `noImplicitAny`, `noUnusedLocals`, `noUnusedParameters` actifs ; 228 tests ; `eslint`
+  0 erreur ; `check-limits`, `vectors:check`, `licenses:check` verts. **Réserves déclarées** : hauteur du volume (130 mm)
+  encore en dur ; 4 commits d'apex-ui non poussés ; `schema:check` échoue tant que R-032 n'est pas faite ; copies
+  `*_local_*` encore présentes à la racine du poste.
 
 ### R-007 — Longueur pivot-pointe portée par le G-code
 - De : apex-ui | À : apex-engine | Contrat : C4, C5 | Ouverte : 2026-10-25
