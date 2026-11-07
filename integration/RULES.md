@@ -419,3 +419,6 @@ la décision de l'utilisateur. Décisions :
   coque au STL est de 0,017 mm (p99) sur death et de 0,13 mm sur turkish, dont 1,9 % des points au-delà de 0,1 mm (parois
   plus fines que la maille) ; sans la projection, 0,29 et 0,23 mm. TetGen reste le mailleur par défaut.
 - Un écart déclaré ici n'est pas une exception cachée : il est nommé, mesuré, et suivi dans le registre des limites du moteur.
+- **Fermeture (2026-11-07)** : sur cette base, **R-029, R-030 et R-031 sont fermées** (décision de l'utilisateur). La priorité
+  absolue du début du §11 (refus de toute autre tâche, format de refus) est levée ; les limites dures du §11.1, la mesure et le
+  rapport de limites par release du §11.2 restent en vigueur.
