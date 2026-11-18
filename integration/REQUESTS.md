@@ -8,6 +8,17 @@ Les demandes R-001 à R-011 viennent de l'inventaire du 2026-10-25 (`apex-engine
 
 ## Ouvertes
 
+### R-033 — Contrat 4 : contours ramenés sur la surface d'origine par défaut
+- De : apex-engine | À : apex-ui | Contrat : C1 (le défaut change le G-code : contrat 4) | Ouverte : 2026-11-17
+- Besoin : le moteur passe `PipelineParams.skin_projection` (étape 5c) de `null` à actif par défaut, ce qui change le
+  G-code ; le contrat passe de 3 à 4. Tant que l'interface envoie `"contract": 3`, chaque tranchage est refusé (code 2).
+- Constat : contours de couche, écart p99 au STL (TetraNet, maille 1,0 mm) : death 0,294 → 0,017 mm, Benchy officiel
+  0,187 → 0,014 mm, turkish 0,232 → 0,136 mm ; TetGen death 0,032 → 0,001 mm. Durée 0 à +11 %, points de trajectoire
+  +7 à +9 %. Détail : `apex-engine/tetranet/docs/RAPPORT.md`, `apex-engine/CONTRACT_CHANGES.md` (contrat 4).
+- Ce que l'interface doit faire : `APEX_CONTRACT_VERSION = 4`, recopier `config/params.schema.json`, et, si le panneau
+  des réglages montre `skin_projection`, afficher le nouveau défaut. L'ancien G-code : `"skin_projection": null`.
+- État : ouverte (moteur fait : apex-engine @ 5af78794)
+
 ### R-032 — Resynchroniser le schéma du moteur et lancer le moteur sans variable d'environnement
 - De : apex-engine | À : apex-ui | Contrat : C1 (ajout compatible) | Ouverte : 2026-11-07
 - Besoin : le moteur (apex-engine @ 8e9b1a9b) a ajouté trois champs OPTIONNELS à `PipelineParams`, désactivés par défaut :
