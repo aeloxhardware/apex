@@ -8,6 +8,34 @@ Les demandes R-001 à R-011 viennent de l'inventaire du 2026-10-25 (`apex-engine
 
 ## Ouvertes
 
+### R-035 — Contrat 5 : Element Ardor plan par défaut, couches pleines, contours recoupés dans le STL
+- De : apex-engine | À : apex-ui | Contrat : C1 (le défaut change le G-code : contrat 5) | Ouverte : 2026-11-19
+- Besoin : le moteur publie le contrat 5 (`CONTRACT_CHANGES.md` du moteur, limites #88 et #89) : couches planes hors des
+  surplombs (`field_solver.planar`), couches pleines (4 dessus, 3 dessous), contours projetés dans le plan de leur
+  couche, étape 5d (contours des couches planes recoupés dans le STL), anneaux concentriques ; nouveaux champs du
+  lissage (`skin.stair_min_deg`, `stair_max_deg`, `proxy_loop`, `latest_band`). Tant que l'interface envoie
+  `"contract": 4`, chaque tranchage est refusé (code 2).
+- À faire, interface : `APEX_CONTRACT_VERSION = 5`, `pnpm schema:sync`, afficher les nouveaux défauts dans le panneau si
+  ces réglages y sont ; R-034 (interrupteur du lissage) peut se faire dans la même passe.
+- État : ouverte (moteur fait : voir le commit apex-engine `alpha-0.2.3.1.8.0.3.221`).
+
+### R-034 — Un interrupteur « Lissage non planaire » pour Element Ardor
+- De : apex-engine | À : apex-ui | Contrat : C1 (ajout compatible, aucun défaut changé) | Ouverte : 2026-11-19
+- Besoin (utilisateur, 2026-11-19) : se servir depuis l'interface du lissage non planaire d'Ardor, rouvert et rendu
+  utilisable sur les couches planes (limite #89 du moteur). Aujourd'hui, aucun réglage du panneau ne l'active :
+  `engineSettings.json` ne contient aucun chemin `skin.*`, et `buildEngineOverrides` n'envoie jamais `params.skin`.
+- Côté moteur : `PipelineParams.skin` vaut `null` par défaut (lissage coupé) ; un objet, même vide (`"skin": {}`),
+  l'active avec les défauts de `SkinParams`. Nouveaux champs de `SkinParams` (non commités à ce jour) :
+  `stair_min_deg` (2), `stair_max_deg` (80), `proxy_loop` (vrai), `latest_band` (faux). Coût mesuré : tranchage ×3 à ×5
+  (Benchy droit 40 → 150 s, death 39 → 222 s). Le G-code lissé commande un Z firmware négatif quand la tête penche
+  au-delà de 90° (jusqu'à −26 mm sur le Benchy) : l'aide du réglage doit le dire.
+- À faire, interface : (1) `pnpm schema:sync` après le commit du moteur ; (2) un interrupteur « Lissage non planaire »
+  (niveau utilisateur, Element Ardor seulement) qui envoie `"skin": {}` quand il est actif et rien sinon ; (3) son texte
+  d'aide dans `engineSettingsHelp.json` (surfaces en pente lissées, flancs presque verticaux hors d'atteinte, durée,
+  Z négatif) ; (4) facultatif, niveau avancé : `skin.thickness`, `skin.stair_max_deg`, `skin.latest_band`. Le registre
+  ne gère que des feuilles : régler `skin.thickness` crée déjà l'objet `skin` et active le lissage, d'où l'interrupteur.
+- État : ouverte (moteur fait mais non commité ; interface à faire).
+
 ### R-033 — Contrat 4 : contours ramenés sur la surface d'origine par défaut
 - De : apex-engine | À : apex-ui | Contrat : C1 (le défaut change le G-code : contrat 4) | Ouverte : 2026-11-17
 - Besoin : le moteur passe `PipelineParams.skin_projection` (étape 5c) de `null` à actif par défaut, ce qui change le
