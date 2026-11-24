@@ -8,6 +8,15 @@ Les demandes R-001 à R-011 viennent de l'inventaire du 2026-10-25 (`apex-engine
 
 ## Ouvertes
 
+### R-037 — Contrat 7 : dessus de la cheminée du Benchy (étape 5d, appariement élargi)
+- De : apex-engine | À : apex-ui | Contrat : C1 (le défaut change le G-code : contrat 7) | Ouverte : 2026-11-25
+- Besoin : `planar_sections.loose_match_tol` (1,0 mm) et `planar_sections.ambiguity_ratio` (2,5), nouveaux champs (limite
+  #91 du moteur) ; le contrat passe de 6 à 7. Tant que l'interface envoie un autre numéro, chaque tranchage est refusé
+  (code 2).
+- À faire, interface : `APEX_CONTRACT_VERSION = 7`, `pnpm schema:sync` (même passe que R-034, R-035 et R-036). Ancien
+  G-code : `"planar_sections": {"loose_match_tol": 0.5}`.
+- État : ouverte (moteur fait : commit apex-engine `alpha-0.2.3.1.8.0.7.221`).
+
 ### R-036 — Contrat 6 : bouts de remplissage trop courts retirés
 - De : apex-engine | À : apex-ui | Contrat : C1 (le défaut change le G-code : contrat 6) | Ouverte : 2026-11-24
 - Besoin : `toolpath2d.min_fill_length` = 0,8 mm par défaut (limite #90 du moteur) ; le contrat passe de 5 à 6. Tant
