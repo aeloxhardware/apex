@@ -8,6 +8,14 @@ Les demandes R-001 à R-011 viennent de l'inventaire du 2026-10-25 (`apex-engine
 
 ## Ouvertes
 
+### R-036 — Contrat 6 : bouts de remplissage trop courts retirés
+- De : apex-engine | À : apex-ui | Contrat : C1 (le défaut change le G-code : contrat 6) | Ouverte : 2026-11-24
+- Besoin : `toolpath2d.min_fill_length` = 0,8 mm par défaut (limite #90 du moteur) ; le contrat passe de 5 à 6. Tant
+  que l'interface envoie un autre numéro, chaque tranchage est refusé (code 2).
+- À faire, interface : `APEX_CONTRACT_VERSION = 6`, `pnpm schema:sync` (peut se faire dans la même passe que R-035 et
+  R-034). Ancien G-code : `"toolpath2d": {"min_fill_length": 0}`.
+- État : ouverte (moteur fait : commit apex-engine `alpha-0.2.3.1.8.0.4.221`).
+
 ### R-035 — Contrat 5 : Element Ardor plan par défaut, couches pleines, contours recoupés dans le STL
 - De : apex-engine | À : apex-ui | Contrat : C1 (le défaut change le G-code : contrat 5) | Ouverte : 2026-11-19
 - Besoin : le moteur publie le contrat 5 (`CONTRACT_CHANGES.md` du moteur, limites #88 et #89) : couches planes hors des
