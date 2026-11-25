@@ -8,6 +8,15 @@ Les demandes R-001 à R-011 viennent de l'inventaire du 2026-10-25 (`apex-engine
 
 ## Ouvertes
 
+### R-043 — Contrat 13 : grille des couches calée sur les dessus (Element Ardor)
+- De : apex-engine | À : apex-ui | Contrat : C1 (le G-code par défaut change : contrat 13) | Ouverte : 2026-11-26
+- Besoin : nouveaux champs `layers.align_levels` (vrai), `field_solver.planar.conform.flat_min_width` (1 mm) et
+  `field_solver.planar.conform.level_spread` (0,1 mm) ; limite #95 du moteur. Tant que l'interface envoie un autre
+  numéro, chaque tranchage est refusé (code 2).
+- À faire, interface : `APEX_CONTRACT_VERSION = 13`, `pnpm schema:sync`. R-041 et R-042 (contrats 11 et 12) sont
+  couvertes par le passage au contrat 12 déjà fait (`alpha-0.2.3.1.9.2.1.221`) : à fermer dans la même passe.
+- État : ouverte (moteur fait : commit apex-engine `alpha-0.2.3.1.9.3.0.221`).
+
 ### R-042 — Contrat 12 : remplissage à 45°, couture du toit, porte-canne (Element Ardor)
 - De : apex-engine | À : apex-ui | Contrat : C1 (le G-code par défaut change : contrat 12) | Ouverte : 2026-11-25
 - Besoin : nouveaux champs `toolpath2d.solid_line_resample` et `planar_sections.surface_levels.complete` (+ bornes
