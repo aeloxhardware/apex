@@ -8,6 +8,16 @@ Les demandes R-001 à R-011 viennent de l'inventaire du 2026-10-25 (`apex-engine
 
 ## Ouvertes
 
+### R-038 — Contrat 8 : couches conformes, contours pris sur le STL, découpage seuillé (Element Ardor)
+- De : apex-engine | À : apex-ui | Contrat : C1 (les défauts changent le G-code : contrat 8) | Ouverte : 2026-11-25
+- Besoin : trois nouveaux réglages actifs par défaut (limite #92 du moteur) : `field_solver.planar.conform`
+  (`ConformParams`), `planar_sections.surface_levels` (`SurfaceLevelParams`), `toolpath2d.run_split_min_slope_deg` = 20.
+  Le contrat passe de 7 à 8 ; tant que l'interface envoie un autre numéro, chaque tranchage est refusé (code 2).
+- À faire, interface : `APEX_CONTRACT_VERSION = 8`, `pnpm schema:sync` (même passe que R-034 à R-037). Facultatif :
+  un interrupteur « Couches conformes » pour Ardor (`field_solver.planar.conform` : `{}` ou `null`). À savoir : le G-code
+  d'Ardor est plus long (Benchy : ~ +88 % de lignes) et le tranchage plus lent (Benchy 30 → ~59 s).
+- État : ouverte (moteur fait : commit apex-engine `alpha-0.2.3.1.9.0.0.221`).
+
 ### R-037 — Contrat 7 : dessus de la cheminée du Benchy (étape 5d, appariement élargi)
 - De : apex-engine | À : apex-ui | Contrat : C1 (le défaut change le G-code : contrat 7) | Ouverte : 2026-11-25
 - Besoin : `planar_sections.loose_match_tol` (1,0 mm) et `planar_sections.ambiguity_ratio` (2,5), nouveaux champs (limite
