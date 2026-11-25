@@ -8,6 +8,13 @@ Les demandes R-001 à R-011 viennent de l'inventaire du 2026-10-25 (`apex-engine
 
 ## Ouvertes
 
+### R-041 — Contrat 11 : plateau infini, la tête ne passe plus dessous
+- De : apex-engine | À : apex-ui | Contrat : C1 (le G-code par défaut change : contrat 11) | Ouverte : 2026-11-25
+- Besoin : `height_clamp` vrai par défaut (limite #93 du moteur). Le contrat passe de 10 à 11 ; tant que l'interface
+  envoie un autre numéro, chaque tranchage est refusé (code 2).
+- À faire, interface : `APEX_CONTRACT_VERSION = 11`, `pnpm schema:sync` (même passe que R-034 à R-040).
+- État : ouverte (moteur fait : commit apex-engine `alpha-0.2.3.1.9.1.5.221`).
+
 ### R-033 — Contrat 4 : contours ramenés sur la surface d'origine par défaut
 - De : apex-engine | À : apex-ui | Contrat : C1 (le défaut change le G-code : contrat 4) | Ouverte : 2026-11-17
 - Besoin : le moteur passe `PipelineParams.skin_projection` (étape 5c) de `null` à actif par défaut, ce qui change le
