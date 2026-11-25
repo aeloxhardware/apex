@@ -8,6 +8,15 @@ Les demandes R-001 à R-011 viennent de l'inventaire du 2026-10-25 (`apex-engine
 
 ## Ouvertes
 
+### R-042 — Contrat 12 : remplissage à 45°, couture du toit, porte-canne (Element Ardor)
+- De : apex-engine | À : apex-ui | Contrat : C1 (le G-code par défaut change : contrat 12) | Ouverte : 2026-11-25
+- Besoin : nouveaux champs `toolpath2d.solid_line_resample` et `planar_sections.surface_levels.complete` (+ bornes
+  `cover_tol`, `uncovered_fraction`, `fragment_fraction`, `min_added_length`, `added_flatness`, `added_tangent_fraction`,
+  `added_min_width`, `added_max_width`) ; limite #94 du moteur. Tant que l'interface envoie un autre numéro, chaque
+  tranchage est refusé (code 2).
+- À faire, interface : `APEX_CONTRACT_VERSION = 12`, `pnpm schema:sync` (même passe que R-034 à R-041).
+- État : ouverte (moteur fait : commit apex-engine `alpha-0.2.3.1.9.2.0.221`).
+
 ### R-041 — Contrat 11 : plateau infini, la tête ne passe plus dessous
 - De : apex-engine | À : apex-ui | Contrat : C1 (le G-code par défaut change : contrat 11) | Ouverte : 2026-11-25
 - Besoin : `height_clamp` vrai par défaut (limite #93 du moteur). Le contrat passe de 10 à 11 ; tant que l'interface
