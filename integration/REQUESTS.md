@@ -8,6 +8,13 @@ Les demandes R-001 à R-011 viennent de l'inventaire du 2026-10-25 (`apex-engine
 
 ## Ouvertes
 
+### R-040 — Contrat 10 : tête verticale sous les couches conformes (Element Ardor)
+- De : apex-engine | À : apex-ui | Contrat : C1 (le G-code par défaut change : contrat 10) | Ouverte : 2026-11-25
+- Besoin : aucun nouveau réglage ; le contrat passe de 9 à 10 (axe de la tête sous les couches conformes, limite #92 du
+  moteur). Tant que l'interface envoie un autre numéro, chaque tranchage est refusé (code 2).
+- À faire, interface : `APEX_CONTRACT_VERSION = 10`, `pnpm schema:sync` (même passe que R-034 à R-039).
+- État : ouverte (moteur fait : commit apex-engine `alpha-0.2.3.1.9.1.2.221`).
+
 ### R-039 — Contrat 9 : étape 5e d'Element Ardor (redécoupage réservé aux boucles courbes)
 - De : apex-engine | À : apex-ui | Contrat : C1 (le défaut change le G-code : contrat 9) | Ouverte : 2026-11-25
 - Besoin : nouveau champ `planar_sections.surface_levels.curved_tol` (0,05 mm). Le contrat passe de 8 à 9 ; tant que
