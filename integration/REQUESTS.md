@@ -8,75 +8,6 @@ Les demandes R-001 à R-011 viennent de l'inventaire du 2026-10-25 (`apex-engine
 
 ## Ouvertes
 
-### R-040 — Contrat 10 : tête verticale sous les couches conformes (Element Ardor)
-- De : apex-engine | À : apex-ui | Contrat : C1 (le G-code par défaut change : contrat 10) | Ouverte : 2026-11-25
-- Besoin : aucun nouveau réglage ; le contrat passe de 9 à 10 (axe de la tête sous les couches conformes, limite #92 du
-  moteur). Tant que l'interface envoie un autre numéro, chaque tranchage est refusé (code 2).
-- À faire, interface : `APEX_CONTRACT_VERSION = 10`, `pnpm schema:sync` (même passe que R-034 à R-039).
-- État : ouverte (moteur fait : commit apex-engine `alpha-0.2.3.1.9.1.2.221`).
-
-### R-039 — Contrat 9 : étape 5e d'Element Ardor (redécoupage réservé aux boucles courbes)
-- De : apex-engine | À : apex-ui | Contrat : C1 (le défaut change le G-code : contrat 9) | Ouverte : 2026-11-25
-- Besoin : nouveau champ `planar_sections.surface_levels.curved_tol` (0,05 mm). Le contrat passe de 8 à 9 ; tant que
-  l'interface envoie un autre numéro, chaque tranchage est refusé (code 2).
-- À faire, interface : `APEX_CONTRACT_VERSION = 9`, `pnpm schema:sync` (même passe que R-034 à R-038).
-- État : ouverte (moteur fait : commit apex-engine `alpha-0.2.3.1.9.0.1.221`).
-
-### R-038 — Contrat 8 : couches conformes, contours pris sur le STL, découpage seuillé (Element Ardor)
-- De : apex-engine | À : apex-ui | Contrat : C1 (les défauts changent le G-code : contrat 8) | Ouverte : 2026-11-25
-- Besoin : trois nouveaux réglages actifs par défaut (limite #92 du moteur) : `field_solver.planar.conform`
-  (`ConformParams`), `planar_sections.surface_levels` (`SurfaceLevelParams`), `toolpath2d.run_split_min_slope_deg` = 20.
-  Le contrat passe de 7 à 8 ; tant que l'interface envoie un autre numéro, chaque tranchage est refusé (code 2).
-- À faire, interface : `APEX_CONTRACT_VERSION = 8`, `pnpm schema:sync` (même passe que R-034 à R-037). Facultatif :
-  un interrupteur « Couches conformes » pour Ardor (`field_solver.planar.conform` : `{}` ou `null`). À savoir : le G-code
-  d'Ardor est plus long (Benchy : ~ +88 % de lignes) et le tranchage plus lent (Benchy 30 → ~59 s).
-- État : ouverte (moteur fait : commit apex-engine `alpha-0.2.3.1.9.0.0.221`).
-
-### R-037 — Contrat 7 : dessus de la cheminée du Benchy (étape 5d, appariement élargi)
-- De : apex-engine | À : apex-ui | Contrat : C1 (le défaut change le G-code : contrat 7) | Ouverte : 2026-11-25
-- Besoin : `planar_sections.loose_match_tol` (1,0 mm) et `planar_sections.ambiguity_ratio` (2,5), nouveaux champs (limite
-  #91 du moteur) ; le contrat passe de 6 à 7. Tant que l'interface envoie un autre numéro, chaque tranchage est refusé
-  (code 2).
-- À faire, interface : `APEX_CONTRACT_VERSION = 7`, `pnpm schema:sync` (même passe que R-034, R-035 et R-036). Ancien
-  G-code : `"planar_sections": {"loose_match_tol": 0.5}`.
-- État : ouverte (moteur fait : commit apex-engine `alpha-0.2.3.1.8.0.7.221`).
-
-### R-036 — Contrat 6 : bouts de remplissage trop courts retirés
-- De : apex-engine | À : apex-ui | Contrat : C1 (le défaut change le G-code : contrat 6) | Ouverte : 2026-11-24
-- Besoin : `toolpath2d.min_fill_length` = 0,8 mm par défaut (limite #90 du moteur) ; le contrat passe de 5 à 6. Tant
-  que l'interface envoie un autre numéro, chaque tranchage est refusé (code 2).
-- À faire, interface : `APEX_CONTRACT_VERSION = 6`, `pnpm schema:sync` (peut se faire dans la même passe que R-035 et
-  R-034). Ancien G-code : `"toolpath2d": {"min_fill_length": 0}`.
-- État : ouverte (moteur fait : commit apex-engine `alpha-0.2.3.1.8.0.4.221`).
-
-### R-035 — Contrat 5 : Element Ardor plan par défaut, couches pleines, contours recoupés dans le STL
-- De : apex-engine | À : apex-ui | Contrat : C1 (le défaut change le G-code : contrat 5) | Ouverte : 2026-11-19
-- Besoin : le moteur publie le contrat 5 (`CONTRACT_CHANGES.md` du moteur, limites #88 et #89) : couches planes hors des
-  surplombs (`field_solver.planar`), couches pleines (4 dessus, 3 dessous), contours projetés dans le plan de leur
-  couche, étape 5d (contours des couches planes recoupés dans le STL), anneaux concentriques ; nouveaux champs du
-  lissage (`skin.stair_min_deg`, `stair_max_deg`, `proxy_loop`, `latest_band`). Tant que l'interface envoie
-  `"contract": 4`, chaque tranchage est refusé (code 2).
-- À faire, interface : `APEX_CONTRACT_VERSION = 5`, `pnpm schema:sync`, afficher les nouveaux défauts dans le panneau si
-  ces réglages y sont ; R-034 (interrupteur du lissage) peut se faire dans la même passe.
-- État : ouverte (moteur fait : voir le commit apex-engine `alpha-0.2.3.1.8.0.3.221`).
-
-### R-034 — Un interrupteur « Lissage non planaire » pour Element Ardor
-- De : apex-engine | À : apex-ui | Contrat : C1 (ajout compatible, aucun défaut changé) | Ouverte : 2026-11-19
-- Besoin (utilisateur, 2026-11-19) : se servir depuis l'interface du lissage non planaire d'Ardor, rouvert et rendu
-  utilisable sur les couches planes (limite #89 du moteur). Aujourd'hui, aucun réglage du panneau ne l'active :
-  `engineSettings.json` ne contient aucun chemin `skin.*`, et `buildEngineOverrides` n'envoie jamais `params.skin`.
-- Côté moteur : `PipelineParams.skin` vaut `null` par défaut (lissage coupé) ; un objet, même vide (`"skin": {}`),
-  l'active avec les défauts de `SkinParams`. Nouveaux champs de `SkinParams` (non commités à ce jour) :
-  `stair_min_deg` (2), `stair_max_deg` (80), `proxy_loop` (vrai), `latest_band` (faux). Coût mesuré : tranchage ×3 à ×5
-  (Benchy droit 40 → 150 s, death 39 → 222 s). Le G-code lissé commande un Z firmware négatif quand la tête penche
-  au-delà de 90° (jusqu'à −26 mm sur le Benchy) : l'aide du réglage doit le dire.
-- À faire, interface : (1) `pnpm schema:sync` après le commit du moteur ; (2) un interrupteur « Lissage non planaire »
-  (niveau utilisateur, Element Ardor seulement) qui envoie `"skin": {}` quand il est actif et rien sinon ; (3) son texte
-  d'aide dans `engineSettingsHelp.json` (surfaces en pente lissées, flancs presque verticaux hors d'atteinte, durée,
-  Z négatif) ; (4) facultatif, niveau avancé : `skin.thickness`, `skin.stair_max_deg`, `skin.latest_band`. Le registre
-  ne gère que des feuilles : régler `skin.thickness` crée déjà l'objet `skin` et active le lissage, d'où l'interrupteur.
-- État : ouverte (moteur fait mais non commité ; interface à faire).
-
 ### R-033 — Contrat 4 : contours ramenés sur la surface d'origine par défaut
 - De : apex-engine | À : apex-ui | Contrat : C1 (le défaut change le G-code : contrat 4) | Ouverte : 2026-11-17
 - Besoin : le moteur passe `PipelineParams.skin_projection` (étape 5c) de `null` à actif par défaut, ce qui change le
@@ -388,6 +319,75 @@ Les demandes R-001 à R-011 viennent de l'inventaire du 2026-10-25 (`apex-engine
 - État : ouverte (moteur fait ; interface : signature, lecture du bloc avant le classement, affichage de la version)
 
 ## Fermées
+
+### R-040 — Contrat 10 : tête verticale sous les couches conformes (Element Ardor)
+- De : apex-engine | À : apex-ui | Contrat : C1 (le G-code par défaut change : contrat 10) | Ouverte : 2026-11-25
+- Besoin : aucun nouveau réglage ; le contrat passe de 9 à 10 (axe de la tête sous les couches conformes, limite #92 du
+  moteur). Tant que l'interface envoie un autre numéro, chaque tranchage est refusé (code 2).
+- À faire, interface : `APEX_CONTRACT_VERSION = 10`, `pnpm schema:sync` (même passe que R-034 à R-039).
+- État : **fermée le 2026-11-25** (interface faite : contrat 10; l'interface déclare le contrat 12 après `pnpm schema:sync`, `apex-ui` @ `alpha-0.2.3.1.9.2.1.221`).
+
+### R-039 — Contrat 9 : étape 5e d'Element Ardor (redécoupage réservé aux boucles courbes)
+- De : apex-engine | À : apex-ui | Contrat : C1 (le défaut change le G-code : contrat 9) | Ouverte : 2026-11-25
+- Besoin : nouveau champ `planar_sections.surface_levels.curved_tol` (0,05 mm). Le contrat passe de 8 à 9 ; tant que
+  l'interface envoie un autre numéro, chaque tranchage est refusé (code 2).
+- À faire, interface : `APEX_CONTRACT_VERSION = 9`, `pnpm schema:sync` (même passe que R-034 à R-038).
+- État : **fermée le 2026-11-25** (interface faite : contrat 9; l'interface déclare le contrat 12 après `pnpm schema:sync`, `apex-ui` @ `alpha-0.2.3.1.9.2.1.221`).
+
+### R-038 — Contrat 8 : couches conformes, contours pris sur le STL, découpage seuillé (Element Ardor)
+- De : apex-engine | À : apex-ui | Contrat : C1 (les défauts changent le G-code : contrat 8) | Ouverte : 2026-11-25
+- Besoin : trois nouveaux réglages actifs par défaut (limite #92 du moteur) : `field_solver.planar.conform`
+  (`ConformParams`), `planar_sections.surface_levels` (`SurfaceLevelParams`), `toolpath2d.run_split_min_slope_deg` = 20.
+  Le contrat passe de 7 à 8 ; tant que l'interface envoie un autre numéro, chaque tranchage est refusé (code 2).
+- À faire, interface : `APEX_CONTRACT_VERSION = 8`, `pnpm schema:sync` (même passe que R-034 à R-037). Facultatif :
+  un interrupteur « Couches conformes » pour Ardor (`field_solver.planar.conform` : `{}` ou `null`). À savoir : le G-code
+  d'Ardor est plus long (Benchy : ~ +88 % de lignes) et le tranchage plus lent (Benchy 30 → ~59 s).
+- État : **fermée le 2026-11-25** (interface faite : contrat 8; l'interface déclare le contrat 12 après `pnpm schema:sync`, `apex-ui` @ `alpha-0.2.3.1.9.2.1.221`).
+
+### R-037 — Contrat 7 : dessus de la cheminée du Benchy (étape 5d, appariement élargi)
+- De : apex-engine | À : apex-ui | Contrat : C1 (le défaut change le G-code : contrat 7) | Ouverte : 2026-11-25
+- Besoin : `planar_sections.loose_match_tol` (1,0 mm) et `planar_sections.ambiguity_ratio` (2,5), nouveaux champs (limite
+  #91 du moteur) ; le contrat passe de 6 à 7. Tant que l'interface envoie un autre numéro, chaque tranchage est refusé
+  (code 2).
+- À faire, interface : `APEX_CONTRACT_VERSION = 7`, `pnpm schema:sync` (même passe que R-034, R-035 et R-036). Ancien
+  G-code : `"planar_sections": {"loose_match_tol": 0.5}`.
+- État : **fermée le 2026-11-25** (interface faite : contrat 7; l'interface déclare le contrat 12 après `pnpm schema:sync`, `apex-ui` @ `alpha-0.2.3.1.9.2.1.221`).
+
+### R-036 — Contrat 6 : bouts de remplissage trop courts retirés
+- De : apex-engine | À : apex-ui | Contrat : C1 (le défaut change le G-code : contrat 6) | Ouverte : 2026-11-24
+- Besoin : `toolpath2d.min_fill_length` = 0,8 mm par défaut (limite #90 du moteur) ; le contrat passe de 5 à 6. Tant
+  que l'interface envoie un autre numéro, chaque tranchage est refusé (code 2).
+- À faire, interface : `APEX_CONTRACT_VERSION = 6`, `pnpm schema:sync` (peut se faire dans la même passe que R-035 et
+  R-034). Ancien G-code : `"toolpath2d": {"min_fill_length": 0}`.
+- État : **fermée le 2026-11-25** (interface faite : contrat 6; l'interface déclare le contrat 12 après `pnpm schema:sync`, `apex-ui` @ `alpha-0.2.3.1.9.2.1.221`).
+
+### R-035 — Contrat 5 : Element Ardor plan par défaut, couches pleines, contours recoupés dans le STL
+- De : apex-engine | À : apex-ui | Contrat : C1 (le défaut change le G-code : contrat 5) | Ouverte : 2026-11-19
+- Besoin : le moteur publie le contrat 5 (`CONTRACT_CHANGES.md` du moteur, limites #88 et #89) : couches planes hors des
+  surplombs (`field_solver.planar`), couches pleines (4 dessus, 3 dessous), contours projetés dans le plan de leur
+  couche, étape 5d (contours des couches planes recoupés dans le STL), anneaux concentriques ; nouveaux champs du
+  lissage (`skin.stair_min_deg`, `stair_max_deg`, `proxy_loop`, `latest_band`). Tant que l'interface envoie
+  `"contract": 4`, chaque tranchage est refusé (code 2).
+- À faire, interface : `APEX_CONTRACT_VERSION = 5`, `pnpm schema:sync`, afficher les nouveaux défauts dans le panneau si
+  ces réglages y sont ; R-034 (interrupteur du lissage) peut se faire dans la même passe.
+- État : **fermée le 2026-11-25** (interface faite : contrat 5; l'interface déclare le contrat 12 après `pnpm schema:sync`, `apex-ui` @ `alpha-0.2.3.1.9.2.1.221`).
+
+### R-034 — Un interrupteur « Lissage non planaire » pour Element Ardor
+- De : apex-engine | À : apex-ui | Contrat : C1 (ajout compatible, aucun défaut changé) | Ouverte : 2026-11-19
+- Besoin (utilisateur, 2026-11-19) : se servir depuis l'interface du lissage non planaire d'Ardor, rouvert et rendu
+  utilisable sur les couches planes (limite #89 du moteur). Aujourd'hui, aucun réglage du panneau ne l'active :
+  `engineSettings.json` ne contient aucun chemin `skin.*`, et `buildEngineOverrides` n'envoie jamais `params.skin`.
+- Côté moteur : `PipelineParams.skin` vaut `null` par défaut (lissage coupé) ; un objet, même vide (`"skin": {}`),
+  l'active avec les défauts de `SkinParams`. Nouveaux champs de `SkinParams` (non commités à ce jour) :
+  `stair_min_deg` (2), `stair_max_deg` (80), `proxy_loop` (vrai), `latest_band` (faux). Coût mesuré : tranchage ×3 à ×5
+  (Benchy droit 40 → 150 s, death 39 → 222 s). Le G-code lissé commande un Z firmware négatif quand la tête penche
+  au-delà de 90° (jusqu'à −26 mm sur le Benchy) : l'aide du réglage doit le dire.
+- À faire, interface : (1) `pnpm schema:sync` après le commit du moteur ; (2) un interrupteur « Lissage non planaire »
+  (niveau utilisateur, Element Ardor seulement) qui envoie `"skin": {}` quand il est actif et rien sinon ; (3) son texte
+  d'aide dans `engineSettingsHelp.json` (surfaces en pente lissées, flancs presque verticaux hors d'atteinte, durée,
+  Z négatif) ; (4) facultatif, niveau avancé : `skin.thickness`, `skin.stair_max_deg`, `skin.latest_band`. Le registre
+  ne gère que des feuilles : régler `skin.thickness` crée déjà l'objet `skin` et active le lissage, d'où l'interrupteur.
+- État : **fermée le 2026-11-25** (interface faite : interrupteur « Lissage non planaire »; l'interface déclare le contrat 12 après `pnpm schema:sync`, `apex-ui` @ `alpha-0.2.3.1.9.2.1.221`).
 
 ### R-029 — Qualité sans compromis : limites mesurées, moteur ET interface, AVANT TOUTE AUTRE TÂCHE
 - De : apex | À : apex-engine **et** apex-ui | Contrat : — | Ouverte : 2026-11-01
