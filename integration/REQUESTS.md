@@ -8,40 +8,6 @@ Les demandes R-001 à R-011 viennent de l'inventaire du 2026-10-25 (`apex-engine
 
 ## Ouvertes
 
-### R-044 — Contrat 14 : calage des couches universel (Element Ardor)
-- De : apex-engine | À : apex-ui | Contrat : C1 (le G-code par défaut change : contrat 14) | Ouverte : 2026-11-27
-- Besoin : `field_solver.planar.conform.flush_tolerance` (nouveau, 0,25 mm) ; `field_solver.planar.conform.level_spread`
-  SUPPRIMÉ (une clé inconnue est refusée) ; limite #96 du moteur. Tant que l'interface envoie un autre numéro, chaque
-  tranchage est refusé (code 2).
-- À faire, interface : `APEX_CONTRACT_VERSION = 14`, `pnpm schema:sync`. Remplace R-043 (contrat 13) si elle n'est pas
-  encore faite : passer directement au 14.
-- État : ouverte (moteur fait : commit apex-engine `alpha-0.2.3.1.9.3.1.221`).
-
-### R-043 — Contrat 13 : grille des couches calée sur les dessus (Element Ardor)
-- De : apex-engine | À : apex-ui | Contrat : C1 (le G-code par défaut change : contrat 13) | Ouverte : 2026-11-26
-- Besoin : nouveaux champs `layers.align_levels` (vrai), `field_solver.planar.conform.flat_min_width` (1 mm) et
-  `field_solver.planar.conform.level_spread` (0,1 mm) ; limite #95 du moteur. Tant que l'interface envoie un autre
-  numéro, chaque tranchage est refusé (code 2).
-- À faire, interface : `APEX_CONTRACT_VERSION = 13`, `pnpm schema:sync`. R-041 et R-042 (contrats 11 et 12) sont
-  couvertes par le passage au contrat 12 déjà fait (`alpha-0.2.3.1.9.2.1.221`) : à fermer dans la même passe.
-- État : ouverte (moteur fait : commit apex-engine `alpha-0.2.3.1.9.3.0.221`).
-
-### R-042 — Contrat 12 : remplissage à 45°, couture du toit, porte-canne (Element Ardor)
-- De : apex-engine | À : apex-ui | Contrat : C1 (le G-code par défaut change : contrat 12) | Ouverte : 2026-11-25
-- Besoin : nouveaux champs `toolpath2d.solid_line_resample` et `planar_sections.surface_levels.complete` (+ bornes
-  `cover_tol`, `uncovered_fraction`, `fragment_fraction`, `min_added_length`, `added_flatness`, `added_tangent_fraction`,
-  `added_min_width`, `added_max_width`) ; limite #94 du moteur. Tant que l'interface envoie un autre numéro, chaque
-  tranchage est refusé (code 2).
-- À faire, interface : `APEX_CONTRACT_VERSION = 12`, `pnpm schema:sync` (même passe que R-034 à R-041).
-- État : ouverte (moteur fait : commit apex-engine `alpha-0.2.3.1.9.2.0.221`).
-
-### R-041 — Contrat 11 : plateau infini, la tête ne passe plus dessous
-- De : apex-engine | À : apex-ui | Contrat : C1 (le G-code par défaut change : contrat 11) | Ouverte : 2026-11-25
-- Besoin : `height_clamp` vrai par défaut (limite #93 du moteur). Le contrat passe de 10 à 11 ; tant que l'interface
-  envoie un autre numéro, chaque tranchage est refusé (code 2).
-- À faire, interface : `APEX_CONTRACT_VERSION = 11`, `pnpm schema:sync` (même passe que R-034 à R-040).
-- État : ouverte (moteur fait : commit apex-engine `alpha-0.2.3.1.9.1.5.221`).
-
 ### R-033 — Contrat 4 : contours ramenés sur la surface d'origine par défaut
 - De : apex-engine | À : apex-ui | Contrat : C1 (le défaut change le G-code : contrat 4) | Ouverte : 2026-11-17
 - Besoin : le moteur passe `PipelineParams.skin_projection` (étape 5c) de `null` à actif par défaut, ce qui change le
@@ -353,6 +319,44 @@ Les demandes R-001 à R-011 viennent de l'inventaire du 2026-10-25 (`apex-engine
 - État : ouverte (moteur fait ; interface : signature, lecture du bloc avant le classement, affichage de la version)
 
 ## Fermées
+
+### R-044 — Contrat 14 : calage des couches universel (Element Ardor)
+- De : apex-engine | À : apex-ui | Contrat : C1 (le G-code par défaut change : contrat 14) | Ouverte : 2026-11-27
+- Besoin : `field_solver.planar.conform.flush_tolerance` (nouveau, 0,25 mm) ; `field_solver.planar.conform.level_spread`
+  SUPPRIMÉ (une clé inconnue est refusée) ; limite #96 du moteur. Tant que l'interface envoie un autre numéro, chaque
+  tranchage est refusé (code 2).
+- À faire, interface : `APEX_CONTRACT_VERSION = 14`, `pnpm schema:sync`. Remplace R-043 (contrat 13) si elle n'est pas
+  encore faite : passer directement au 14.
+- État : faite le 2026-11-27 (apex-ui @ c565b79, alpha-0.2.3.1.9.3.40.221 : contrat 14 ; `APEX_CONTRACT_VERSION = 14`, `schema:sync`, `--check` vert). Moteur : voir ci-dessus.
+
+
+### R-043 — Contrat 13 : grille des couches calée sur les dessus (Element Ardor)
+- De : apex-engine | À : apex-ui | Contrat : C1 (le G-code par défaut change : contrat 13) | Ouverte : 2026-11-26
+- Besoin : nouveaux champs `layers.align_levels` (vrai), `field_solver.planar.conform.flat_min_width` (1 mm) et
+  `field_solver.planar.conform.level_spread` (0,1 mm) ; limite #95 du moteur. Tant que l'interface envoie un autre
+  numéro, chaque tranchage est refusé (code 2).
+- À faire, interface : `APEX_CONTRACT_VERSION = 13`, `pnpm schema:sync`. R-041 et R-042 (contrats 11 et 12) sont
+  couvertes par le passage au contrat 12 déjà fait (`alpha-0.2.3.1.9.2.1.221`) : à fermer dans la même passe.
+- État : faite le 2026-11-27 (apex-ui @ c565b79, alpha-0.2.3.1.9.3.40.221 : contrat 13, remplacé par R-044 : passé directement au 14 ; `APEX_CONTRACT_VERSION = 14`, `schema:sync`, `--check` vert). Moteur : voir ci-dessus.
+
+
+### R-042 — Contrat 12 : remplissage à 45°, couture du toit, porte-canne (Element Ardor)
+- De : apex-engine | À : apex-ui | Contrat : C1 (le G-code par défaut change : contrat 12) | Ouverte : 2026-11-25
+- Besoin : nouveaux champs `toolpath2d.solid_line_resample` et `planar_sections.surface_levels.complete` (+ bornes
+  `cover_tol`, `uncovered_fraction`, `fragment_fraction`, `min_added_length`, `added_flatness`, `added_tangent_fraction`,
+  `added_min_width`, `added_max_width`) ; limite #94 du moteur. Tant que l'interface envoie un autre numéro, chaque
+  tranchage est refusé (code 2).
+- À faire, interface : `APEX_CONTRACT_VERSION = 12`, `pnpm schema:sync` (même passe que R-034 à R-041).
+- État : faite le 2026-11-27 (apex-ui @ c565b79, alpha-0.2.3.1.9.3.40.221 : contrat 12, couvert par le passage au 14 ; `APEX_CONTRACT_VERSION = 14`, `schema:sync`, `--check` vert). Moteur : voir ci-dessus.
+
+
+### R-041 — Contrat 11 : plateau infini, la tête ne passe plus dessous
+- De : apex-engine | À : apex-ui | Contrat : C1 (le G-code par défaut change : contrat 11) | Ouverte : 2026-11-25
+- Besoin : `height_clamp` vrai par défaut (limite #93 du moteur). Le contrat passe de 10 à 11 ; tant que l'interface
+  envoie un autre numéro, chaque tranchage est refusé (code 2).
+- À faire, interface : `APEX_CONTRACT_VERSION = 11`, `pnpm schema:sync` (même passe que R-034 à R-040).
+- État : faite le 2026-11-27 (apex-ui @ c565b79, alpha-0.2.3.1.9.3.40.221 : contrat 11, couvert par le passage au 14 ; `APEX_CONTRACT_VERSION = 14`, `schema:sync`, `--check` vert). Moteur : voir ci-dessus.
+
 
 ### R-040 — Contrat 10 : tête verticale sous les couches conformes (Element Ardor)
 - De : apex-engine | À : apex-ui | Contrat : C1 (le G-code par défaut change : contrat 10) | Ouverte : 2026-11-25
