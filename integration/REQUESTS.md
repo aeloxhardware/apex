@@ -8,6 +8,15 @@ Les demandes R-001 à R-011 viennent de l'inventaire du 2026-10-25 (`apex-engine
 
 ## Ouvertes
 
+### R-044 — Contrat 14 : calage des couches universel (Element Ardor)
+- De : apex-engine | À : apex-ui | Contrat : C1 (le G-code par défaut change : contrat 14) | Ouverte : 2026-11-27
+- Besoin : `field_solver.planar.conform.flush_tolerance` (nouveau, 0,25 mm) ; `field_solver.planar.conform.level_spread`
+  SUPPRIMÉ (une clé inconnue est refusée) ; limite #96 du moteur. Tant que l'interface envoie un autre numéro, chaque
+  tranchage est refusé (code 2).
+- À faire, interface : `APEX_CONTRACT_VERSION = 14`, `pnpm schema:sync`. Remplace R-043 (contrat 13) si elle n'est pas
+  encore faite : passer directement au 14.
+- État : ouverte (moteur fait : commit apex-engine `alpha-0.2.3.1.9.3.1.221`).
+
 ### R-043 — Contrat 13 : grille des couches calée sur les dessus (Element Ardor)
 - De : apex-engine | À : apex-ui | Contrat : C1 (le G-code par défaut change : contrat 13) | Ouverte : 2026-11-26
 - Besoin : nouveaux champs `layers.align_levels` (vrai), `field_solver.planar.conform.flat_min_width` (1 mm) et
