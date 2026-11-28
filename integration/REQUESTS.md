@@ -16,7 +16,11 @@ Les demandes R-001 à R-011 viennent de l'inventaire du 2026-10-25 (`apex-engine
 - À faire, interface : `pnpm schema:sync` ; proposer la machine XYZAB ; aperçu du G-code : le G-code commande le PIVOT,
   la pointe est à `pivot_to_tip` le long de R_A R_B (0, 0, −1) (description complète dans la ligne
   `; apex_kinematics_json` du fichier). Le modèle 3D de la nouvelle tête manque (à exporter de la CAO).
-- État : ouverte (moteur fait : commit apex-engine `alpha-0.2.3.1.10.0.0.221`).
+- Complément (2026-11-28, `alpha-0.2.3.1.11.0.0.221`) : `main.py machines` rend les profils en JSON (`id`, `name`,
+  `kinematics`, `profile`) et la machine par défaut : le menu des machines en vient. Nouveaux champs facultatifs :
+  `machine_profile.toolhead_envelope`, `support_check.tool_axis_check`, `runtime.gcode_workers` ; défaut
+  `field_solver.planar.lean_deg` = 30 (coupé par le moteur sur l'Aetheris-4).
+- État : ouverte (moteur fait : commit apex-engine `alpha-0.2.3.1.10.0.0.221` et `alpha-0.2.3.1.11.0.0.221`).
 
 ### R-033 — Contrat 4 : contours ramenés sur la surface d'origine par défaut
 - De : apex-engine | À : apex-ui | Contrat : C1 (le défaut change le G-code : contrat 4) | Ouverte : 2026-11-17
